@@ -50,6 +50,7 @@ export type Item = {
 };
 
 const STORAGE_KEY = 'mock_items_v1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
 
 function isMockEnabled(): boolean {
   // Enable by setting VITE_USE_MOCK=true in .env.local
@@ -119,7 +120,7 @@ export async function listItems(): Promise<Item[]> {
   if (isMockEnabled()) {
     return readMock();
   }
-  const res = await fetch('/api/items');
+  const res = await fetch(`${API_BASE_URL}/items`);
   if (!res.ok) throw new Error('Failed to fetch items');
   return res.json();
 }
@@ -144,11 +145,11 @@ export async function createItem(itemData: Omit<Item, 'id' | 'status' | 'created
   }
   
   // For backend, fetch existing items to generate next ID
-  const existingResponse = await fetch('/api/items');
+  const existingResponse = await fetch(`${API_BASE_URL}/items`);
   const existingItems = existingResponse.ok ? await existingResponse.json() : [];
   const id = nextId(existingItems);
   
-  const res = await fetch('/api/items', {
+  const res = await fetch(`${API_BASE_URL}/items`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -207,7 +208,7 @@ export async function updateItem(id: number, updates: Partial<Pick<Item, 'status
     writeMock(merged);
     return updated;
   }
-  const res = await fetch(`/api/items/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/items/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updates)
@@ -222,7 +223,7 @@ export async function deleteItem(id: number): Promise<void> {
     writeMock(items.filter(i => i.id !== id));
     return;
   }
-  const res = await fetch(`/api/items/${id}`, { method: 'DELETE' });
+  const res = await fetch(`${API_BASE_URL}/items/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to delete item');
 }
 
@@ -243,7 +244,7 @@ export async function addTaskEvent(id: number, event: TaskEvent): Promise<Item> 
     return updatedItem;
   }
   
-  const res = await fetch(`/api/items/${id}/events`, {
+  const res = await fetch(`${API_BASE_URL}/items/${id}/events`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(event)
