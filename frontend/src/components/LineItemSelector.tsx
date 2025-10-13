@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { listLineItemTemplates, createLineItemTemplate, type LineItemTemplate } from '../api/lineItemTemplates'
 
@@ -13,6 +13,7 @@ export default function LineItemSelector({ value, onChange, placeholder = "Selec
   const [isOpen, setIsOpen] = useState(false)
   const [customValue, setCustomValue] = useState('')
   const queryClient = useQueryClient()
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const templatesQuery = useQuery({
     queryKey: ['lineItemTemplates'],
@@ -63,13 +64,27 @@ export default function LineItemSelector({ value, onChange, placeholder = "Selec
     template.description.toLowerCase().includes(value.toLowerCase())
   )
 
+  const handleFocus = () => {
+    setIsOpen(true)
+    
+    // Scroll into view on mobile devices
+    if (containerRef.current && window.innerWidth <= 768) {
+      setTimeout(() => {
+        containerRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        })
+      }, 300) // Delay to allow keyboard to appear
+    }
+  }
+
   return (
-    <div style={{ position: 'relative', width: '100%' }}>
+    <div ref={containerRef} style={{ position: 'relative', width: '100%' }}>
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        onFocus={() => setIsOpen(true)}
+        onFocus={handleFocus}
         placeholder={placeholder}
         required={required}
         style={{
