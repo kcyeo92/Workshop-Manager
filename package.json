@@ -1,0 +1,18 @@
+{
+  "name": "fullstack-app",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev:backend": "npm --workspace backend run dev",
+    "dev:frontend": "npm --workspace frontend run dev",
+    "dev": "concurrently -k -n backend,frontend -c blue,green \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "build": "npm --workspace backend run build && npm --workspace frontend run build",
+    "studio": "npm --workspace backend run studio"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
