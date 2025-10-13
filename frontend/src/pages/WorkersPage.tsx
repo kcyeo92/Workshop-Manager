@@ -38,7 +38,7 @@ export default function WorkersPage() {
   })
 
   const createWorkerMutation = useMutation({
-    mutationFn: (data: Omit<Worker, 'id' | 'createdAt' | 'isActive'>) => createWorker(data),
+    mutationFn: (data: Omit<Worker, 'id' | 'createdAt' | 'updatedAt' | 'isActive'>) => createWorker(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workers'] })
       setIsAddModalOpen(false)
@@ -144,7 +144,7 @@ export default function WorkersPage() {
         paid: boolean
         createdAt: number
         workerIndex: number
-        allWorkers: Worker[]
+        allWorkers: TaskWorker[]
       }>
     }>()
 
