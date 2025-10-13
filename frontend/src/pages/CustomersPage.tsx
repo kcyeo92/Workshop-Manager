@@ -28,7 +28,7 @@ export default function CustomersPage() {
   })
 
   const createCustomerMutation = useMutation({
-    mutationFn: (data: Omit<Customer, 'id' | 'createdAt' | 'isActive'>) => createCustomer(data),
+    mutationFn: (data: Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'isActive'>) => createCustomer(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] })
       setIsAddModalOpen(false)
@@ -122,7 +122,7 @@ export default function CustomersPage() {
 
   const handleAddCustomer = () => {
     if (!formData.name.trim()) return
-    
+
     createCustomerMutation.mutate({
       name: formData.name.trim(),
       phone: formData.phone.trim() || undefined,
