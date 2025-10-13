@@ -1,0 +1,131 @@
+// Datasource and generator
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Worker {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  phone      String?
+  email      String?
+  address    String?
+  hourlyRate Float    @default(0)
+  notes      String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  phone     String?
+  email     String?
+  address   String?
+  notes     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LineItemTemplate {
+  id            Int      @id @default(autoincrement())
+  description   String   @unique
+  category      String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Item {
+  id              Int             @id
+  customer        String
+  vehiclePlateNo  String
+  vehicleMake     String
+  vehicleModel    String
+  description     String?
+  status          String          @default("todo") // todo, assigned, processing, done
+  price           Float           @default(0)
+  paid            Float           @default(0)
+  completedAt     BigInt?
+  createdAt       BigInt
+  updatedAt       BigInt
+  
+  lineItems       LineItem[]
+  workers         TaskWorker[]
+  statusHistory   StatusHistory[]
+  taskEvents      TaskEvent[]
+  photos          Photo[]
+}
+
+model LineItem {
+  id          Int     @id @default(autoincrement())
+  itemId      Int
+  description String
+  amount      Float
+  
+  item        Item    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
+model TaskWorker {
+  id      Int     @id @default(autoincrement())
+  itemId  Int
+  name    String
+  wage    Float
+  paid    Boolean @default(false)
+  
+  item    Item    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
+model StatusHistory {
+  id         Int      @id @default(autoincrement())
+  itemId     Int
+  status     String
+  fromStatus String?
+  timestamp  BigInt
+  
+  item       Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
+model TaskEvent {
+  id            Int     @id @default(autoincrement())
+  itemId        Int
+  type          String  // invoice_generated, payment_received
+  timestamp     BigInt
+  invoiceNumber String?
+  
+  item          Item    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
+model Photo {
+  id            Int    @id @default(autoincrement())
+  itemId        Int
+  fileId        String
+  fileName      String
+  thumbnailLink String
+  viewLink      String
+  
+  item          Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id                   String   @id // Invoice number (format: yy0001)
+  taskIds              String   // JSON array of task IDs
+  customerName         String
+  totalAmount          Float
+  tasksSnapshot        String   // JSON snapshot of tasks at time of invoice creation
+  paymentReceived      Boolean  @default(false)
+  paymentReceivedDate  BigInt?
+  createdAt            BigInt
+  updatedAt            BigInt
+}
+
+model InvoiceSequence {
+  id       Int @id @default(1)
+  sequence Int @default(0)
+}
