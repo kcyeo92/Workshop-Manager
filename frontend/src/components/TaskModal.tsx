@@ -330,6 +330,27 @@ export default function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <label style={{
                   padding: '4px 12px',
+                  backgroundColor: '#007bff',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 4,
+                  cursor: isUploadingPhotos ? 'not-allowed' : 'pointer',
+                  fontSize: 12,
+                  opacity: isUploadingPhotos ? 0.6 : 1
+                }}>
+                  {isUploadingPhotos ? '⏳' : '📷'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    multiple
+                    onChange={handlePhotoUpload}
+                    disabled={isUploadingPhotos}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+                <label style={{
+                  padding: '4px 12px',
                   backgroundColor: '#28a745',
                   color: 'white',
                   border: 'none',
@@ -338,7 +359,7 @@ export default function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
                   fontSize: 12,
                   opacity: isUploadingPhotos ? 0.6 : 1
                 }}>
-                  {isUploadingPhotos ? '⏳ Uploading...' : '📷 Upload More'}
+                  {isUploadingPhotos ? '⏳' : '🖼️'}
                   <input
                     type="file"
                     accept="image/*"

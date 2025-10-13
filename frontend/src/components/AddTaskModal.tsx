@@ -275,7 +275,7 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
 
         {/* Photo Upload */}
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
             <label style={{
               padding: '4px 12px',
               backgroundColor: '#007bff',
@@ -283,9 +283,33 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
               border: 'none',
               borderRadius: 4,
               cursor: 'pointer',
-              fontSize: 13
+              fontSize: 13,
+              flex: 1,
+              textAlign: 'center'
             }}>
-              {isAnalyzing ? '🔄 Analyzing...' : '📷 Upload Photos'}
+              {isAnalyzing ? '⏳' : '📷 Camera'}
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                multiple
+                onChange={handlePhotoUpload}
+                style={{ display: 'none' }}
+                disabled={isAnalyzing}
+              />
+            </label>
+            <label style={{
+              padding: '4px 12px',
+              backgroundColor: '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: 4,
+              cursor: 'pointer',
+              fontSize: 13,
+              flex: 1,
+              textAlign: 'center'
+            }}>
+              {isAnalyzing ? '⏳' : '🖼️ Gallery'}
               <input
                 type="file"
                 accept="image/*"
