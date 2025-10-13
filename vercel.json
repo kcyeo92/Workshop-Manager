@@ -1,5 +1,6 @@
 {
-  "buildCommand": "npm install --legacy-peer-deps && cd frontend && npm run build",
-  "outputDirectory": "frontend/dist"
+  "buildCommand": "npm install --force && npm rebuild rollup && cd frontend && npm run build",
+  "outputDirectory": "frontend/dist",
+  "framework": null
 }
 
