@@ -1,6 +1,6 @@
 {
-  "buildCommand": "npm install --force && npm rebuild rollup && cd frontend && npm run build",
+  "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
-  "framework": null
+  "installCommand": "cd frontend && npm install"
 }
 
