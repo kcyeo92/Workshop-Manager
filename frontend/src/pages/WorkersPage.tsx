@@ -83,7 +83,7 @@ export default function WorkersPage() {
       phone: formData.phone.trim() || undefined,
       email: formData.email.trim() || undefined,
       address: formData.address.trim() || undefined,
-      hourlyRate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : undefined,
+      hourlyRate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : 0,
       notes: formData.notes.trim() || undefined
     })
   }
@@ -252,6 +252,8 @@ export default function WorkersPage() {
 
   const handleWorkerPaidToggle = (task: typeof filteredWorkerTasks[0], e: React.MouseEvent) => {
     e.stopPropagation()
+    
+    if (!task.allWorkers) return
     
     const updatedWorkers = task.allWorkers.map((worker, idx) => 
       idx === task.workerIndex ? { ...worker, paid: !worker.paid } : worker
