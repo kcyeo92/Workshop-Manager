@@ -65,14 +65,12 @@ export default function WorkerAssignmentModal({ task, isOpen, onClose, onSuccess
     }
   }
 
-  const handleWorkerChange = (index: number, field: keyof Worker, value: string | boolean) => {
+  const handleWorkerChange = (index: number, field: keyof Worker, value: string) => {
     const newWorkers = [...workers]
     if (field === 'wage') {
-      newWorkers[index] = { ...newWorkers[index], wage: parseFloat(value as string) || 0 }
-    } else if (field === 'paid') {
-      newWorkers[index] = { ...newWorkers[index], paid: value as boolean }
+      newWorkers[index] = { ...newWorkers[index], wage: parseFloat(value) || 0 }
     } else {
-      newWorkers[index] = { ...newWorkers[index], name: value as string }
+      newWorkers[index] = { ...newWorkers[index], name: value }
     }
     setWorkers(newWorkers)
   }
@@ -89,28 +87,11 @@ export default function WorkerAssignmentModal({ task, isOpen, onClose, onSuccess
 
         {/* Workers */}
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <label style={{ fontWeight: 500, fontSize: 14 }}>Assign Workers *</label>
-            <button
-              type="button"
-              onClick={addWorker}
-              style={{
-                padding: '4px 12px',
-                backgroundColor: '#28a745',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 13
-              }}
-            >
-              + Add Worker
-            </button>
-          </div>
+          <label style={{ fontWeight: 500, fontSize: 14, marginBottom: 8, display: 'block' }}>Assign Workers *</label>
           
           {workers.map((worker, index) => (
             <div key={index} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
-              <div style={{ flex: 2 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <WorkerSelector
                   value={worker.name}
                   onChange={(value) => handleWorkerChange(index, 'name', value)}
@@ -125,35 +106,29 @@ export default function WorkerAssignmentModal({ task, isOpen, onClose, onSuccess
                 value={worker.wage || ''}
                 onChange={(e) => handleWorkerChange(index, 'wage', e.target.value)}
                 style={{
-                  flex: 1,
+                  width: 100,
                   padding: 8,
                   border: '1px solid #ddd',
                   borderRadius: 4,
-                  fontSize: 14
+                  fontSize: 14,
+                  flexShrink: 0
                 }}
                 placeholder="Wage"
               />
-              <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                <input
-                  type="checkbox"
-                  checked={worker.paid}
-                  onChange={(e) => handleWorkerChange(index, 'paid', e.target.checked)}
-                  style={{ cursor: 'pointer', width: 16, height: 16 }}
-                />
-                <span style={{ fontSize: 13 }}>Paid</span>
-              </label>
               {workers.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeWorker(index)}
                   style={{
-                    padding: '4px 12px',
+                    width: 40,
+                    padding: 8,
                     backgroundColor: '#dc3545',
                     color: 'white',
                     border: 'none',
                     borderRadius: 4,
                     cursor: 'pointer',
-                    fontSize: 14
+                    fontSize: 14,
+                    flexShrink: 0
                   }}
                 >
                   ×
@@ -161,6 +136,25 @@ export default function WorkerAssignmentModal({ task, isOpen, onClose, onSuccess
               )}
             </div>
           ))}
+          
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}>
+            <button
+              type="button"
+              onClick={addWorker}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: 4,
+                cursor: 'pointer',
+                fontSize: 12,
+                width: 'auto'
+              }}
+            >
+              + Add Worker
+            </button>
+          </div>
         </div>
 
         {/* Total Wages */}

@@ -145,7 +145,8 @@ export default function WorkerSelector({ value, onChange, placeholder = "Select 
                 cursor: 'pointer',
                 borderBottom: '1px solid #f0f0f0',
                 fontSize: 14,
-                color: 'black'
+                color: 'black',
+                textAlign: 'left'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = '#f8f9fa'
@@ -161,14 +162,14 @@ export default function WorkerSelector({ value, onChange, placeholder = "Select 
           {/* Add new worker section */}
           <div style={{ borderTop: '1px solid #ddd', padding: '8px 12px', backgroundColor: '#f8f9fa' }}>
             <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>Add new worker:</div>
-            <div style={{ display: 'flex', gap: 4 }}>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'stretch' }}>
               <input
                 type="text"
                 value={customValue}
                 onChange={(e) => setCustomValue(e.target.value)}
                 placeholder="Enter worker name..."
                 style={{
-                  flex: 1,
+                  flex: '0 0 70%',
                   padding: 4,
                   border: '1px solid #ccc',
                   borderRadius: 2,
@@ -185,6 +186,7 @@ export default function WorkerSelector({ value, onChange, placeholder = "Select 
                 onClick={handleAddNew}
                 disabled={!customValue.trim() || createWorkerMutation.isPending}
                 style={{
+                  flex: '1',
                   padding: '4px 8px',
                   backgroundColor: '#007bff',
                   color: 'white',

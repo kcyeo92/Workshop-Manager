@@ -63,17 +63,18 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
     console.log('Form data:', formData)
     console.log('Line items:', lineItems)
     
-    if (!formData.customer.trim() || !formData.vehiclePlateNo.trim() || !formData.vehicleMake.trim() || !formData.vehicleModel.trim()) {
-      console.log('Validation failed: Missing required fields')
-      alert('Please fill in all required fields (Customer, Plate Number, Vehicle Make, Vehicle Model)')
+    // Only require customer
+    if (!formData.customer.trim()) {
+      console.log('Validation failed: Missing customer')
+      alert('Please enter a customer name')
       return
     }
     
-    // Validate line items - at least one with description and amount > 0
-    const validLineItems = lineItems.filter(li => li.description.trim() && li.amount > 0)
+    // Validate line items - at least one with description (amount is optional)
+    const validLineItems = lineItems.filter(li => li.description.trim())
     if (validLineItems.length === 0) {
       console.log('Validation failed: No valid line items')
-      alert('Please add at least one item with description and amount')
+      alert('Please add at least one item with a description')
       return
     }
     
@@ -82,9 +83,9 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
     // Create the task immediately
     createMutation.mutate({
       customer: formData.customer.trim(),
-      vehiclePlateNo: formData.vehiclePlateNo.trim(),
-      vehicleMake: formData.vehicleMake.trim(),
-      vehicleModel: formData.vehicleModel.trim(),
+      vehiclePlateNo: formData.vehiclePlateNo.trim() || 'N/A',
+      vehicleMake: formData.vehicleMake.trim() || 'N/A',
+      vehicleModel: formData.vehicleModel.trim() || 'N/A',
       description: formData.description.trim() || undefined,
       lineItems: validLineItems
     })
@@ -213,8 +214,7 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
                 backgroundColor: 'white',
                 color: 'black'
               }}
-              placeholder="Plate Number *"
-              required
+              placeholder="Plate Number"
             />
           </div>
         </div>
@@ -235,8 +235,7 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
                 backgroundColor: 'white',
                 color: 'black'
               }}
-              placeholder="Vehicle Make *"
-              required
+              placeholder="Vehicle Make"
             />
           </div>
           <div style={{ flex: 1 }}>
@@ -253,8 +252,7 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
                 backgroundColor: 'white',
                 color: 'black'
               }}
-              placeholder="Vehicle Model *"
-              required
+              placeholder="Vehicle Model"
             />
           </div>
         </div>
@@ -434,7 +432,7 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
                     handleLineItemChange(index, 'description', description)
                   }}
                   placeholder="Select or enter item..."
-                  required
+                  required={index === 0}
                 />
               </div>
               <input

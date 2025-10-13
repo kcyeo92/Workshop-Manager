@@ -728,92 +728,73 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
               {editingSection === 'workers' ? (
                 // Edit mode
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {editForm.workers.map((worker, index) => (
-                    <div key={index} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                      <div style={{ flex: '0 0 40%' }}>
-                        <WorkerSelector
-                          value={worker.name}
-                          onChange={async (name) => {
-                            const newWorkers = [...editForm.workers]
-                            // Try to fetch worker's hourly rate
-                            try {
-                              const workerData = await getWorkerByName(name)
-                              if (workerData) {
-                                newWorkers[index] = { ...newWorkers[index], name, wage: workerData.hourlyRate || 0 }
-                              } else {
-                                newWorkers[index] = { ...newWorkers[index], name }
-                              }
-                            } catch {
+                {editForm.workers.map((worker, index) => (
+                  <div key={index} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                    <div style={{ flex: '1 1 0', minWidth: 0 }}>
+                      <WorkerSelector
+                        value={worker.name}
+                        onChange={async (name) => {
+                          const newWorkers = [...editForm.workers]
+                          // Try to fetch worker's hourly rate
+                          try {
+                            const workerData = await getWorkerByName(name)
+                            if (workerData) {
+                              newWorkers[index] = { ...newWorkers[index], name, wage: workerData.hourlyRate || 0 }
+                            } else {
                               newWorkers[index] = { ...newWorkers[index], name }
                             }
-                            setEditForm(prev => ({ ...prev, workers: newWorkers }))
-                          }}
-                          required
-                        />
-                      </div>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={worker.wage || ''}
-                        onChange={(e) => {
-                          const newWorkers = [...editForm.workers]
-                          newWorkers[index] = { ...newWorkers[index], wage: parseFloat(e.target.value) || 0 }
+                          } catch {
+                            newWorkers[index] = { ...newWorkers[index], name }
+                          }
                           setEditForm(prev => ({ ...prev, workers: newWorkers }))
                         }}
-                        style={{
-                          flex: '0 0 25%',
-                          padding: 8,
-                          border: '1px solid #ddd',
-                          borderRadius: 4,
-                          fontSize: 14,
-                          backgroundColor: 'white',
-                          color: 'black'
-                        }}
-                        placeholder="Wage"
+                        required
                       />
-                      <label style={{ 
-                        flex: '0 0 20%',
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: 6,
-                        color: '#fff',
-                        fontSize: 14,
-                        cursor: 'pointer',
-                        userSelect: 'none'
-                      }}>
-                        <input
-                          type="checkbox"
-                          checked={worker.paid || false}
-                          onChange={(e) => {
-                            const newWorkers = [...editForm.workers]
-                            newWorkers[index] = { ...newWorkers[index], paid: e.target.checked }
-                            setEditForm(prev => ({ ...prev, workers: newWorkers }))
-                          }}
-                          style={{ cursor: 'pointer' }}
-                        />
-                        Paid
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newWorkers = editForm.workers.filter((_, i) => i !== index)
-                          setEditForm(prev => ({ ...prev, workers: newWorkers }))
-                        }}
-                        style={{
-                          padding: '8px 12px',
-                          backgroundColor: '#dc3545',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: 4,
-                          cursor: 'pointer',
-                          fontSize: 14
-                        }}
-                      >
-                        ×
-                      </button>
                     </div>
-                  ))}
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={worker.wage || ''}
+                      onChange={(e) => {
+                        const newWorkers = [...editForm.workers]
+                        newWorkers[index] = { ...newWorkers[index], wage: parseFloat(e.target.value) || 0 }
+                        setEditForm(prev => ({ ...prev, workers: newWorkers }))
+                      }}
+                      style={{
+                        width: 80,
+                        padding: 8,
+                        border: '1px solid #ddd',
+                        borderRadius: 4,
+                        fontSize: 14,
+                        backgroundColor: 'white',
+                        color: 'black',
+                        flexShrink: 0
+                      }}
+                      placeholder="Wage"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newWorkers = editForm.workers.filter((_, i) => i !== index)
+                        setEditForm(prev => ({ ...prev, workers: newWorkers }))
+                      }}
+                      style={{
+                        width: 40,
+                        padding: 8,
+                        backgroundColor: '#dc3545',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: 4,
+                        cursor: 'pointer',
+                        fontSize: 14,
+                        flexShrink: 0
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
                   
                   <button
                     type="button"
