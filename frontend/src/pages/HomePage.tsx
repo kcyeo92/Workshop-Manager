@@ -235,7 +235,8 @@ export default function HomePage() {
       <TaskModal 
         task={selectedTask} 
         isOpen={isModalOpen} 
-        onClose={handleModalClose} 
+        onClose={handleModalClose}
+        readOnly={true}
       />
 
       {/* Add Task Modal */}

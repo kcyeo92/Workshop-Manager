@@ -19,9 +19,10 @@ interface TaskModalProps {
   task: Item | null
   isOpen: boolean
   onClose: () => void
+  readOnly?: boolean
 }
 
-export default function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
+export default function TaskModal({ task, isOpen, onClose, readOnly = false }: TaskModalProps) {
   const [formData, setFormData] = useState({
     status: 'todo' as 'todo' | 'assigned' | 'processing' | 'done',
     customer: '',
@@ -327,49 +328,51 @@ export default function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
                   `}</style>
                 </div>
               )}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <label style={{
-                  padding: '4px 12px',
-                  backgroundColor: '#007bff',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 4,
-                  cursor: isUploadingPhotos ? 'not-allowed' : 'pointer',
-                  fontSize: 12,
-                  opacity: isUploadingPhotos ? 0.6 : 1
-                }}>
-                  {isUploadingPhotos ? '⏳' : '📷'}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    multiple
-                    onChange={handlePhotoUpload}
-                    disabled={isUploadingPhotos}
-                    style={{ display: 'none' }}
-                  />
-                </label>
-                <label style={{
-                  padding: '4px 12px',
-                  backgroundColor: '#28a745',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 4,
-                  cursor: isUploadingPhotos ? 'not-allowed' : 'pointer',
-                  fontSize: 12,
-                  opacity: isUploadingPhotos ? 0.6 : 1
-                }}>
-                  {isUploadingPhotos ? '⏳' : '🖼️'}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handlePhotoUpload}
-                    disabled={isUploadingPhotos}
-                    style={{ display: 'none' }}
-                  />
-                </label>
-              </div>
+              {!readOnly && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <label style={{
+                    padding: '4px 12px',
+                    backgroundColor: '#007bff',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 4,
+                    cursor: isUploadingPhotos ? 'not-allowed' : 'pointer',
+                    fontSize: 12,
+                    opacity: isUploadingPhotos ? 0.6 : 1
+                  }}>
+                    {isUploadingPhotos ? '⏳' : '📷'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      multiple
+                      onChange={handlePhotoUpload}
+                      disabled={isUploadingPhotos}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                  <label style={{
+                    padding: '4px 12px',
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 4,
+                    cursor: isUploadingPhotos ? 'not-allowed' : 'pointer',
+                    fontSize: 12,
+                    opacity: isUploadingPhotos ? 0.6 : 1
+                  }}>
+                    {isUploadingPhotos ? '⏳' : '🖼️'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handlePhotoUpload}
+                      disabled={isUploadingPhotos}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                </div>
+              )}
             </div>
             
             {photos.length > 0 ? (
@@ -452,23 +455,45 @@ export default function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
         {/* Customer and Plate Number */}
         <div style={{ display: 'flex', gap: 12 }}>
           <div style={{ flex: 1 }}>
-            <CustomerSelector
-              value={formData.customer}
-              onChange={handleChange('customer')}
-              placeholder="Customer *"
-            />
+            {readOnly ? (
+              <input
+                type="text"
+                value={formData.customer}
+                readOnly
+                style={{
+                  width: '100%',
+                  padding: 8,
+                  border: '1px solid #555',
+                  borderRadius: 4,
+                  fontSize: 16,
+                  backgroundColor: '#2a2a2a',
+                  color: '#fff',
+                  cursor: 'default'
+                }}
+              />
+            ) : (
+              <CustomerSelector
+                value={formData.customer}
+                onChange={handleChange('customer')}
+                placeholder="Customer *"
+              />
+            )}
           </div>
           <div style={{ flex: 1 }}>
             <input
               type="text"
               value={formData.vehiclePlateNo}
               onChange={handleChange('vehiclePlateNo')}
+              readOnly={readOnly}
               style={{
                 width: '100%',
                 padding: 8,
-                border: '1px solid #ddd',
+                border: `1px solid ${readOnly ? '#555' : '#ddd'}`,
                 borderRadius: 4,
-                fontSize: 16
+                fontSize: 16,
+                backgroundColor: readOnly ? '#2a2a2a' : 'white',
+                color: readOnly ? '#fff' : 'black',
+                cursor: readOnly ? 'default' : 'text'
               }}
               placeholder="Plate Number *"
             />
@@ -482,12 +507,16 @@ export default function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
               type="text"
               value={formData.vehicleMake}
               onChange={handleChange('vehicleMake')}
+              readOnly={readOnly}
               style={{
                 width: '100%',
                 padding: 8,
-                border: '1px solid #ddd',
+                border: `1px solid ${readOnly ? '#555' : '#ddd'}`,
                 borderRadius: 4,
-                fontSize: 16
+                fontSize: 16,
+                backgroundColor: readOnly ? '#2a2a2a' : 'white',
+                color: readOnly ? '#fff' : 'black',
+                cursor: readOnly ? 'default' : 'text'
               }}
               placeholder="Vehicle Make *"
             />
@@ -497,12 +526,16 @@ export default function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
               type="text"
               value={formData.vehicleModel}
               onChange={handleChange('vehicleModel')}
+              readOnly={readOnly}
               style={{
                 width: '100%',
                 padding: 8,
-                border: '1px solid #ddd',
+                border: `1px solid ${readOnly ? '#555' : '#ddd'}`,
                 borderRadius: 4,
-                fontSize: 16
+                fontSize: 16,
+                backgroundColor: readOnly ? '#2a2a2a' : 'white',
+                color: readOnly ? '#fff' : 'black',
+                cursor: readOnly ? 'default' : 'text'
               }}
               placeholder="Vehicle Model *"
             />
@@ -514,16 +547,19 @@ export default function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
           <textarea
             value={formData.description}
             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+            readOnly={readOnly}
             style={{
               width: '100%',
               padding: 8,
-              border: '1px solid #ddd',
+              border: `1px solid ${readOnly ? '#555' : '#ddd'}`,
               borderRadius: 4,
               fontSize: 16,
               minHeight: 60,
               fontFamily: 'inherit',
               resize: 'vertical',
-              color: 'white'
+              color: 'white',
+              backgroundColor: readOnly ? '#2a2a2a' : 'transparent',
+              cursor: readOnly ? 'default' : 'text'
             }}
             placeholder="Additional details (optional)"
           />
@@ -533,34 +569,54 @@ export default function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
         <div style={{ marginTop: 8 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <label style={{ fontWeight: 500, fontSize: 14 }}>Items & Charges</label>
-            <button
-              type="button"
-              onClick={addLineItem}
-              style={{
-                padding: '4px 12px',
-                backgroundColor: '#28a745',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 13
-              }}
-            >
-              + Add Item
-            </button>
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={addLineItem}
+                style={{
+                  padding: '4px 12px',
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                  fontSize: 13
+                }}
+              >
+                + Add Item
+              </button>
+            )}
           </div>
           
           {lineItems.map((lineItem, index) => (
             <div key={index} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
               <div style={{ flex: 2 }}>
-                <LineItemSelector
-                  value={lineItem.description}
-                  onChange={(description) => {
-                    handleLineItemChange(index, 'description', description)
-                  }}
-                  placeholder="Select or enter item..."
-                  required
-                />
+                {readOnly ? (
+                  <input
+                    type="text"
+                    value={lineItem.description}
+                    readOnly
+                    style={{
+                      width: '100%',
+                      padding: 8,
+                      border: '1px solid #555',
+                      borderRadius: 4,
+                      fontSize: 14,
+                      backgroundColor: '#2a2a2a',
+                      color: '#fff',
+                      cursor: 'default'
+                    }}
+                  />
+                ) : (
+                  <LineItemSelector
+                    value={lineItem.description}
+                    onChange={(description) => {
+                      handleLineItemChange(index, 'description', description)
+                    }}
+                    placeholder="Select or enter item..."
+                    required
+                  />
+                )}
               </div>
               <input
                 type="number"
@@ -568,16 +624,20 @@ export default function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
                 min="0"
                 value={lineItem.amount || ''}
                 onChange={(e) => handleLineItemChange(index, 'amount', e.target.value)}
+                readOnly={readOnly}
                 style={{
                   flex: 1,
                   padding: 8,
-                  border: '1px solid #ddd',
+                  border: `1px solid ${readOnly ? '#555' : '#ddd'}`,
                   borderRadius: 4,
-                  fontSize: 14
+                  fontSize: 14,
+                  backgroundColor: readOnly ? '#2a2a2a' : 'white',
+                  color: readOnly ? '#fff' : 'black',
+                  cursor: readOnly ? 'default' : 'text'
                 }}
                 placeholder="Amount"
               />
-              {lineItems.length > 1 && (
+              {lineItems.length > 1 && !readOnly && (
                 <button
                   type="button"
                   onClick={() => removeLineItem(index)}
@@ -614,31 +674,51 @@ export default function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <label style={{ fontWeight: 500, fontSize: 14 }}>Assigned Workers</label>
-            <button
-              type="button"
-              onClick={addWorker}
-              style={{
-                padding: '4px 12px',
-                backgroundColor: '#28a745',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 13
-              }}
-            >
-              + Add Worker
-            </button>
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={addWorker}
+                style={{
+                  padding: '4px 12px',
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                  fontSize: 13
+                }}
+              >
+                + Add Worker
+              </button>
+            )}
           </div>
           
           {workers.map((worker, index) => (
             <div key={index} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
               <div style={{ flex: 2 }}>
-                <WorkerSelector
-                  value={worker.name}
-                  onChange={(value) => handleWorkerChange(index, 'name', value)}
-                  placeholder="Worker name"
-                />
+                {readOnly ? (
+                  <input
+                    type="text"
+                    value={worker.name}
+                    readOnly
+                    style={{
+                      width: '100%',
+                      padding: 8,
+                      border: '1px solid #555',
+                      borderRadius: 4,
+                      fontSize: 14,
+                      backgroundColor: '#2a2a2a',
+                      color: '#fff',
+                      cursor: 'default'
+                    }}
+                  />
+                ) : (
+                  <WorkerSelector
+                    value={worker.name}
+                    onChange={(value) => handleWorkerChange(index, 'name', value)}
+                    placeholder="Worker name"
+                  />
+                )}
               </div>
               <input
                 type="number"
@@ -646,25 +726,30 @@ export default function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
                 min="0"
                 value={worker.wage || ''}
                 onChange={(e) => handleWorkerChange(index, 'wage', e.target.value)}
+                readOnly={readOnly}
                 style={{
                   flex: 1,
                   padding: 8,
-                  border: '1px solid #ddd',
+                  border: `1px solid ${readOnly ? '#555' : '#ddd'}`,
                   borderRadius: 4,
-                  fontSize: 14
+                  fontSize: 14,
+                  backgroundColor: readOnly ? '#2a2a2a' : 'white',
+                  color: readOnly ? '#fff' : 'black',
+                  cursor: readOnly ? 'default' : 'text'
                 }}
                 placeholder="Wage"
               />
-              <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: readOnly ? 'default' : 'pointer', whiteSpace: 'nowrap' }}>
                 <input
                   type="checkbox"
                   checked={worker.paid}
                   onChange={(e) => handleWorkerChange(index, 'paid', e.target.checked)}
-                  style={{ cursor: 'pointer', width: 16, height: 16 }}
+                  disabled={readOnly}
+                  style={{ cursor: readOnly ? 'default' : 'pointer', width: 16, height: 16 }}
                 />
                 <span style={{ fontSize: 13 }}>Paid</span>
               </label>
-              {workers.length > 1 && (
+              {workers.length > 1 && !readOnly && (
                 <button
                   type="button"
                   onClick={() => removeWorker(index)}
@@ -698,78 +783,103 @@ export default function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
         </div>
 
         {/* Status */}
-        <div>
-          <select
-            value={formData.status}
-            onChange={handleChange('status')}
-            style={{
-              width: '100%',
-              padding: 8,
-              border: '1px solid #ddd',
-              borderRadius: 4,
-              fontSize: 16,
-              backgroundColor: 'white',
-              color: 'black'
-            }}
-          >
-            <option value="todo">Status: Todo</option>
-            <option value="assigned">Status: Assigned</option>
-            <option value="processing">Status: Processing</option>
-            <option value="done">Status: Done</option>
-          </select>
-        </div>
+        {readOnly ? (
+          <div style={{ padding: 8, fontSize: 16, color: '#fff' }}>
+            <strong>Status:</strong> {formData.status.charAt(0).toUpperCase() + formData.status.slice(1)}
+          </div>
+        ) : (
+          <div>
+            <select
+              value={formData.status}
+              onChange={handleChange('status')}
+              style={{
+                width: '100%',
+                padding: 8,
+                border: '1px solid #ddd',
+                borderRadius: 4,
+                fontSize: 16,
+                backgroundColor: 'white',
+                color: 'black'
+              }}
+            >
+              <option value="todo">Status: Todo</option>
+              <option value="assigned">Status: Assigned</option>
+              <option value="processing">Status: Processing</option>
+              <option value="done">Status: Done</option>
+            </select>
+          </div>
+        )}
 
         {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 8 }}>
-          <button
-            onClick={handleDelete}
-            disabled={deleteMutation.isPending}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#dc3545',
-              color: 'white',
-              border: 'none',
-              borderRadius: 4,
-              cursor: 'pointer',
-              fontSize: 14,
-              opacity: deleteMutation.isPending ? 0.6 : 1
-            }}
-          >
-            {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
-          </button>
-          
-          <button
-            onClick={onClose}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#6c757d',
-              color: 'white',
-              border: 'none',
-              borderRadius: 4,
-              cursor: 'pointer',
-              fontSize: 14
-            }}
-          >
-            Cancel
-          </button>
-          
+        {readOnly ? (
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 8 }}>
             <button
-              onClick={handleSave}
-              disabled={updateMutation.isPending || !formData.customer.trim()}
+              onClick={onClose}
               style={{
                 padding: '8px 16px',
-                backgroundColor: '#007bff',
+                backgroundColor: '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: 4,
+                cursor: 'pointer',
+                fontSize: 14
+              }}
+            >
+              Close
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 8 }}>
+            <button
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#dc3545',
                 color: 'white',
                 border: 'none',
                 borderRadius: 4,
                 cursor: 'pointer',
                 fontSize: 14,
-                opacity: updateMutation.isPending || !formData.customer.trim() ? 0.6 : 1
+                opacity: deleteMutation.isPending ? 0.6 : 1
               }}
             >
-              {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
             </button>
-        </div>
+            
+            <button
+              onClick={onClose}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: 4,
+                cursor: 'pointer',
+                fontSize: 14
+              }}
+            >
+              Cancel
+            </button>
+            
+              <button
+                onClick={handleSave}
+                disabled={updateMutation.isPending || !formData.customer.trim()}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#007bff',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                  fontSize: 14,
+                  opacity: updateMutation.isPending || !formData.customer.trim() ? 0.6 : 1
+                }}
+              >
+                {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+              </button>
+          </div>
+        )}
 
         {/* Error Display */}
         {(updateMutation.error || deleteMutation.error) && (

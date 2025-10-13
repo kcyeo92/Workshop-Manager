@@ -1,15 +1,29 @@
 /* Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 #root {
   width: 100%;
   margin: 0 auto;
   padding: 0;
   text-align: center;
+  overflow-x: hidden;
 }
 
 .app-layout {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 .app-main {
@@ -18,11 +32,13 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
+  overflow-x: hidden;
 }
 
 .App {
   padding: 0;
   width: 100%;
+  overflow-x: hidden;
 }
 
 /* Header Styles */
@@ -587,6 +603,7 @@
 @media (max-width: 480px) {
   .app-main {
     padding: 0.25rem;
+    overflow-x: hidden;
   }
   
   .header-content {
@@ -684,6 +701,13 @@
   
   .kanban-board {
     gap: 0.75rem;
+    overflow-x: hidden;
+    width: 100%;
+  }
+  
+  .kanban-column {
+    overflow-x: hidden;
+    width: 100%;
   }
   
   .column-header {
@@ -694,46 +718,82 @@
   .column-content {
     min-height: 150px;
     padding: 6px;
+    overflow-x: hidden;
   }
   
   .task-card {
-    padding: 8px;
-    margin-bottom: 6px;
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+    border-left: 3px solid #007bff;
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
   }
   
   .task-content {
     flex-direction: column;
-    gap: 6px;
+    gap: 0;
+    align-items: flex-start;
+    overflow-x: hidden;
+    max-width: 100%;
   }
   
   .task-info {
     width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 8px;
+    overflow-x: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
   
   .task-title {
     font-size: 13px;
-    margin-bottom: 6px;
+    font-weight: 600;
+    margin-bottom: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    grid-column: 1 / -1;
   }
   
   .task-detail {
-    font-size: 11px;
-    margin-bottom: 3px;
-    line-height: 1.4;
+    font-size: 9px;
+    line-height: 1.2;
+    margin-bottom: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
   
   .task-price,
   .task-worker,
   .task-paid {
-    font-size: 11px;
+    font-size: 9px;
+    margin: 0;
+    line-height: 1.2;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
   
   .delete-button {
-    align-self: flex-end;
-    margin-left: 0;
-    padding: 8px 12px;
-    font-size: 16px;
-    min-width: 32px;
-    min-height: 32px;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    min-height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid #dc3545;
+    line-height: 1;
   }
 }
 
@@ -744,14 +804,9 @@
     margin-bottom: 10px;
   }
   
-  .add-task-button,
-  .delete-button {
+  .add-task-button {
     min-height: 44px;
     min-width: 44px;
-  }
-  
-  .delete-button {
-    font-size: 18px;
   }
 }
 
