@@ -343,7 +343,6 @@ export default function TaskModal({ task, isOpen, onClose }: TaskModalProps) {
                     type="file"
                     accept="image/*"
                     multiple
-                    capture="environment"
                     onChange={handlePhotoUpload}
                     disabled={isUploadingPhotos}
                     style={{ display: 'none' }}

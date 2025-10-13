@@ -290,7 +290,6 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
                 type="file"
                 accept="image/*"
                 multiple
-                capture="environment"
                 onChange={handlePhotoUpload}
                 style={{ display: 'none' }}
                 disabled={isAnalyzing}
