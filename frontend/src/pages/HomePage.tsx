@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import { listItems, updateItem, deleteItem, type Item } from '../api/items'
-import TaskModal from '../components/TaskModal'
+import TaskViewModal from '../components/TaskViewModal'
 import AddTaskModal from '../components/AddTaskModal'
 import WorkerAssignmentModal from '../components/WorkerAssignmentModal'
 import '../App.css'
@@ -232,11 +232,10 @@ export default function HomePage() {
       </DragDropContext>
 
       {/* Task Detail Modal */}
-      <TaskModal 
+      <TaskViewModal 
         task={selectedTask} 
         isOpen={isModalOpen} 
         onClose={handleModalClose}
-        readOnly={true}
       />
 
       {/* Add Task Modal */}
