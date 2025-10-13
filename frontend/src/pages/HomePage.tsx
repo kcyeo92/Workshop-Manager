@@ -100,11 +100,15 @@ export default function HomePage() {
     const task = items.find(item => item.id === itemId)
     if (!task) return
     
-    // If moving to "assigned" column, prompt for worker assignment
+    // If moving to "assigned" column, prompt for worker assignment only if no workers assigned yet
     if (newStatus === 'assigned') {
-      setPendingDragTask(task)
-      setIsWorkerModalOpen(true)
-      return
+      // Check if task already has workers assigned
+      if (!task.workers || task.workers.length === 0) {
+        setPendingDragTask(task)
+        setIsWorkerModalOpen(true)
+        return
+      }
+      // If workers already assigned, just update status directly
     }
     
     // For other columns, proceed with normal update
@@ -146,17 +150,30 @@ export default function HomePage() {
   }
 
   return (
-    <div className="App">
+    <div className="App" style={{ position: 'relative', minHeight: '100vh' }}>
       
-        {/* Add new task button */}
-        <div className="add-task-section">
-          <button
-            className="add-task-button"
-            onClick={() => setIsAddModalOpen(true)}
-          >
-            + Add New Task
-          </button>
-        </div>
+        {/* Add new task button - Fixed Bottom Right */}
+        <button
+          className="add-task-button"
+          onClick={() => setIsAddModalOpen(true)}
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            zIndex: 1000,
+            borderRadius: '50%',
+            width: '60px',
+            height: '60px',
+            fontSize: '24px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 0
+          }}
+        >
+          +
+        </button>
 
       {itemsQuery.isLoading ? <div>Loading...</div> : null}
       {itemsQuery.error ? <div style={{ color: 'crimson' }}>{(itemsQuery.error as Error).message}</div> : null}

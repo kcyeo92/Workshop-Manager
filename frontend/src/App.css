@@ -832,7 +832,7 @@ html, body {
   max-width: 500px;
   width: 100%;
   max-height: 90vh;
-  overflow: auto;
+  overflow: visible;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   position: relative;
 }
@@ -877,9 +877,7 @@ html, body {
   background-color: #e0e0e0;
 }
 
-.modal-body {
-  /* Modal body content styles */
-}
+
 
 /* Form Elements in Modals */
 .modal-body input,

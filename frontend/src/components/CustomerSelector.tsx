@@ -78,7 +78,10 @@ export default function CustomerSelector({ value, onChange, placeholder = "Selec
           border: '1px solid #ddd',
           borderRadius: 4,
           fontSize: 16,
-          paddingRight: 40
+          paddingRight: 40,
+          backgroundColor: 'white',
+          color: 'black',
+          textAlign: 'left'
         }}
       />
       
@@ -126,7 +129,8 @@ export default function CustomerSelector({ value, onChange, placeholder = "Selec
                 cursor: 'pointer',
                 borderBottom: '1px solid #f0f0f0',
                 fontSize: 14,
-                color: 'black'
+                color: 'black',
+                textAlign: 'left'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = '#f8f9fa'
@@ -140,16 +144,16 @@ export default function CustomerSelector({ value, onChange, placeholder = "Selec
           ))}
           
           {/* Add new customer section */}
-          <div style={{ borderTop: '1px solid #ddd', padding: '8px 12px', backgroundColor: '#f8f9fa' }}>
-            <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>Add new customer:</div>
-            <div style={{ display: 'flex', gap: 4 }}>
+          <div style={{ borderTop: '1px solid #ddd', padding: '6px 8px', backgroundColor: '#f8f9fa' }}>
+            <div style={{ fontSize: 11, color: '#666', marginBottom: 3 }}>Add new customer:</div>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'stretch' }}>
               <input
                 type="text"
                 value={customValue}
                 onChange={(e) => setCustomValue(e.target.value)}
                 placeholder="Enter customer name..."
                 style={{
-                  flex: 1,
+                  flex: '0 0 70%',
                   padding: 4,
                   border: '1px solid #ccc',
                   borderRadius: 2,
@@ -166,12 +170,14 @@ export default function CustomerSelector({ value, onChange, placeholder = "Selec
                 onClick={handleAddNew}
                 disabled={!customValue.trim() || createCustomerMutation.isPending}
                 style={{
+                  flex: '1',
                   padding: '4px 8px',
                   backgroundColor: '#007bff',
                   color: 'white',
                   border: 'none',
                   borderRadius: 2,
                   cursor: 'pointer',
+                  whiteSpace: 'nowrap',
                   fontSize: 12,
                   opacity: customValue.trim() && !createCustomerMutation.isPending ? 1 : 0.6
                 }}

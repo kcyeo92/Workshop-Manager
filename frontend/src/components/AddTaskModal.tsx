@@ -209,7 +209,9 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
                 padding: 8,
                 border: '1px solid #ddd',
                 borderRadius: 4,
-                fontSize: 16
+                fontSize: 16,
+                backgroundColor: 'white',
+                color: 'black'
               }}
               placeholder="Plate Number *"
               required
@@ -229,7 +231,9 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
                 padding: 8,
                 border: '1px solid #ddd',
                 borderRadius: 4,
-                fontSize: 16
+                fontSize: 16,
+                backgroundColor: 'white',
+                color: 'black'
               }}
               placeholder="Vehicle Make *"
               required
@@ -245,7 +249,9 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
                 padding: 8,
                 border: '1px solid #ddd',
                 borderRadius: 4,
-                fontSize: 16
+                fontSize: 16,
+                backgroundColor: 'white',
+                color: 'black'
               }}
               placeholder="Vehicle Model *"
               required
@@ -267,7 +273,8 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
               minHeight: 60,
               fontFamily: 'inherit',
               resize: 'vertical',
-              color: 'white'
+              backgroundColor: 'white',
+              color: 'black'
             }}
             placeholder="Additional details (optional)"
           />
@@ -396,19 +403,22 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
 
         {/* Line Items */}
         <div style={{ marginTop: 8 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <label style={{ fontWeight: 500, fontSize: 14 }}>Items & Charges *</label>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+            <label style={{ flex: '0 0 70%', fontWeight: 500, fontSize: 14, textAlign: 'left' }}>Items & Charges *</label>
             <button
               type="button"
               onClick={addLineItem}
               style={{
-                padding: '4px 12px',
+                flex: '1',
+                padding: '4px 10px',
                 backgroundColor: '#28a745',
                 color: 'white',
                 border: 'none',
                 borderRadius: 4,
                 cursor: 'pointer',
-                fontSize: 13
+                fontSize: 12,
+                whiteSpace: 'nowrap',
+                textAlign: 'center'
               }}
             >
               + Add Item
@@ -417,7 +427,7 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
           
           {lineItems.map((lineItem, index) => (
             <div key={index} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-              <div style={{ flex: 2 }}>
+              <div style={{ flex: '0 0 70%' }}>
                 <LineItemSelector
                   value={lineItem.description}
                   onChange={(description) => {
@@ -434,11 +444,13 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
                 value={lineItem.amount || ''}
                 onChange={(e) => handleLineItemChange(index, 'amount', e.target.value)}
                 style={{
-                  flex: 1,
+                  flex: '1',
                   padding: 8,
                   border: '1px solid #ddd',
                   borderRadius: 4,
-                  fontSize: 14
+                  fontSize: 14,
+                  backgroundColor: 'white',
+                  color: 'black'
                 }}
                 placeholder="Amount"
               />
