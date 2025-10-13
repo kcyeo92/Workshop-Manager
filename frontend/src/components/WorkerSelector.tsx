@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { listWorkers } from '../api/workers'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { listWorkers, createWorker } from '../api/workers'
 
 interface WorkerSelectorProps {
   value: string
@@ -12,10 +12,18 @@ interface WorkerSelectorProps {
 export default function WorkerSelector({ value, onChange, placeholder = "Select or enter worker...", required = false }: WorkerSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [customValue, setCustomValue] = useState('')
+  const queryClient = useQueryClient()
 
   const workersQuery = useQuery({
     queryKey: ['workers'],
     queryFn: listWorkers,
+  })
+
+  const createWorkerMutation = useMutation({
+    mutationFn: createWorker,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workers'] })
+    },
   })
 
   const dbWorkers = workersQuery.data || []
@@ -26,9 +34,29 @@ export default function WorkerSelector({ value, onChange, placeholder = "Select 
     setIsOpen(false)
   }
 
-  const handleAddNew = () => {
+  const handleAddNew = async () => {
     if (customValue.trim()) {
-      onChange(customValue.trim())
+      const workerName = customValue.trim()
+      
+      // Check if worker already exists
+      const existing = dbWorkers.find(w => w.name.toLowerCase() === workerName.toLowerCase())
+      if (existing) {
+        onChange(workerName)
+      } else {
+        // Create worker in database
+        try {
+          await createWorkerMutation.mutateAsync({ 
+            name: workerName,
+            hourlyRate: 0
+          })
+          onChange(workerName)
+        } catch (error) {
+          console.error('Failed to create worker:', error)
+          // Still allow the user to use it
+          onChange(workerName)
+        }
+      }
+      
       setCustomValue('')
       setIsOpen(false)
     }
@@ -139,7 +167,7 @@ export default function WorkerSelector({ value, onChange, placeholder = "Select 
               <button
                 type="button"
                 onClick={handleAddNew}
-                disabled={!customValue.trim()}
+                disabled={!customValue.trim() || createWorkerMutation.isPending}
                 style={{
                   padding: '4px 8px',
                   backgroundColor: '#007bff',
@@ -148,10 +176,10 @@ export default function WorkerSelector({ value, onChange, placeholder = "Select 
                   borderRadius: 2,
                   cursor: 'pointer',
                   fontSize: 12,
-                  opacity: customValue.trim() ? 1 : 0.6
+                  opacity: customValue.trim() && !createWorkerMutation.isPending ? 1 : 0.6
                 }}
               >
-                Add
+                {createWorkerMutation.isPending ? '...' : 'Add'}
               </button>
             </div>
           </div>

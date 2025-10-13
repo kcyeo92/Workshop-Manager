@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { listCustomers } from '../api/customers'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { listCustomers, createCustomer } from '../api/customers'
 
 interface CustomerSelectorProps {
   value: string
@@ -12,10 +12,18 @@ interface CustomerSelectorProps {
 export default function CustomerSelector({ value, onChange, placeholder = "Select or enter customer...", required = false }: CustomerSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [customValue, setCustomValue] = useState('')
+  const queryClient = useQueryClient()
 
   const customersQuery = useQuery({
     queryKey: ['customers'],
     queryFn: listCustomers,
+  })
+
+  const createCustomerMutation = useMutation({
+    mutationFn: createCustomer,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['customers'] })
+    },
   })
 
   const dbCustomers = customersQuery.data || []
@@ -26,9 +34,26 @@ export default function CustomerSelector({ value, onChange, placeholder = "Selec
     setIsOpen(false)
   }
 
-  const handleAddNew = () => {
+  const handleAddNew = async () => {
     if (customValue.trim()) {
-      onChange(customValue.trim())
+      const customerName = customValue.trim()
+      
+      // Check if customer already exists
+      const existing = dbCustomers.find(c => c.name.toLowerCase() === customerName.toLowerCase())
+      if (existing) {
+        onChange(customerName)
+      } else {
+        // Create customer in database
+        try {
+          await createCustomerMutation.mutateAsync({ name: customerName })
+          onChange(customerName)
+        } catch (error) {
+          console.error('Failed to create customer:', error)
+          // Still allow the user to use it
+          onChange(customerName)
+        }
+      }
+      
       setCustomValue('')
       setIsOpen(false)
     }
@@ -139,7 +164,7 @@ export default function CustomerSelector({ value, onChange, placeholder = "Selec
               <button
                 type="button"
                 onClick={handleAddNew}
-                disabled={!customValue.trim()}
+                disabled={!customValue.trim() || createCustomerMutation.isPending}
                 style={{
                   padding: '4px 8px',
                   backgroundColor: '#007bff',
@@ -148,10 +173,10 @@ export default function CustomerSelector({ value, onChange, placeholder = "Selec
                   borderRadius: 2,
                   cursor: 'pointer',
                   fontSize: 12,
-                  opacity: customValue.trim() ? 1 : 0.6
+                  opacity: customValue.trim() && !createCustomerMutation.isPending ? 1 : 0.6
                 }}
               >
-                Add
+                {createCustomerMutation.isPending ? '...' : 'Add'}
               </button>
             </div>
           </div>
