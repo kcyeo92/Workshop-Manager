@@ -13,14 +13,18 @@ interface InvoiceModalProps {
 export default function InvoiceModal({ tasks, isOpen, onClose, invoiceNumber: propInvoiceNumber, invoiceDate: propInvoiceDate }: InvoiceModalProps) {
   const invoiceRef = useRef<HTMLDivElement>(null)
 
+  const getFilename = () => {
+    const invoiceNumber = propInvoiceNumber || (tasks.length > 0 ? tasks[0].id.toString() : '')
+    const customerName = tasks.length > 0 ? tasks[0].customer : 'Customer'
+    const today = new Date().toISOString().split('T')[0] // Format: YYYY-MM-DD
+    return `Invoice_${today}_${invoiceNumber}_${customerName.replace(/[^a-zA-Z0-9]/g, '_')}`
+  }
+
   const handlePrint = () => {
     if (invoiceRef.current) {
       const printWindow = window.open('', '', 'width=800,height=600')
       if (printWindow) {
-        const invoiceNumber = propInvoiceNumber || (tasks.length > 0 ? tasks[0].id.toString() : '')
-        const customerName = tasks.length > 0 ? tasks[0].customer : 'Customer'
-        const today = new Date().toISOString().split('T')[0] // Format: YYYY-MM-DD
-        const filename = `Invoice_${today}_${invoiceNumber}_${customerName.replace(/[^a-zA-Z0-9]/g, '_')}`
+        const filename = getFilename()
         printWindow.document.write(`
           <html>
             <head>
@@ -71,6 +75,68 @@ export default function InvoiceModal({ tasks, isOpen, onClose, invoiceNumber: pr
         setTimeout(() => {
           printWindow.print()
           printWindow.close()
+        }, 250)
+      }
+    }
+  }
+
+  const handleSave = () => {
+    if (invoiceRef.current) {
+      const printWindow = window.open('', '', 'width=800,height=600')
+      if (printWindow) {
+        const filename = getFilename()
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>${filename}</title>
+              <style>
+                * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                body { font-family: Arial, sans-serif; padding: 0; margin: 0; color: black; }
+                .invoice-container { max-width: 800px; margin: 0 auto; }
+                .header { text-align: left; margin-bottom: 30px; }
+                .company-name { font-weight: bold; font-size: 18px; margin-bottom: 5px; }
+                .company-details { font-size: 12px; line-height: 1.5; }
+                .invoice-info { text-align: right; margin-bottom: 30px; }
+                .invoice-number { font-size: 14px; font-weight: bold; }
+                .invoice-details { font-size: 12px; }
+                .payment-method { text-align: left; margin-bottom: 30px; font-size: 14px; }
+                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                th { border-bottom: 1px solid #000; padding: 8px; text-align: left; font-size: 12px; }
+                td { padding: 8px; font-size: 12px; border-bottom: none; }
+                .amount-column { text-align: right; }
+                .total-row { font-weight: bold; border-top: 2px solid #000; }
+                .total-words { margin: 20px 0; font-size: 12px; }
+                .signature-section { margin-top: 80px; display: flex; justify-content: space-between; }
+                .signature-box { text-align: center; width: 45%; }
+                .signature-line { border-top: 1px solid #000; padding-top: 5px; font-size: 12px; }
+                .footer { margin-top: 40px; text-align: center; font-size: 12px; }
+                @page {
+                  margin-top: 40px;
+                  margin-bottom: 20px;
+                  margin-left: 40px;
+                  margin-right: 20px;
+                  size: auto;
+                }
+                @media print {
+                  html, body {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                  }
+                }
+              </style>
+            </head>
+            <body>
+              ${invoiceRef.current.innerHTML}
+            </body>
+          </html>
+        `)
+        printWindow.document.close()
+        printWindow.focus()
+        
+        // Use print dialog with save as PDF option
+        setTimeout(() => {
+          printWindow.print()
+          // Window will stay open so user can choose to save as PDF
         }, 250)
       }
     }
@@ -258,6 +324,21 @@ export default function InvoiceModal({ tasks, isOpen, onClose, invoiceNumber: pr
             }}
           >
             Close
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: 4,
+              cursor: 'pointer',
+              fontSize: 14
+            }}
+          >
+            Save as PDF
           </button>
           <button
             type="button"
