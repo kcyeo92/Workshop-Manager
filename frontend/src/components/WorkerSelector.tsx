@@ -47,7 +47,8 @@ export default function WorkerSelector({ value, onChange, placeholder = "Select 
         try {
           await createWorkerMutation.mutateAsync({ 
             name: workerName,
-            hourlyRate: 0
+            hourlyRate: 0,
+            isActive: true
           })
           onChange(workerName)
         } catch (error) {
