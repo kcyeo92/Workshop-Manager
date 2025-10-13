@@ -38,7 +38,7 @@ export default function WorkersPage() {
   })
 
   const createWorkerMutation = useMutation({
-    mutationFn: (data: Omit<Worker, 'id' | 'createdAt' | 'updatedAt' | 'isActive'>) => createWorker(data),
+    mutationFn: (data: Omit<Worker, 'id' | 'createdAt' | 'updatedAt'>) => createWorker(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workers'] })
       setIsAddModalOpen(false)
@@ -84,7 +84,8 @@ export default function WorkersPage() {
       email: formData.email.trim() || undefined,
       address: formData.address.trim() || undefined,
       hourlyRate: formData.hourlyRate ? parseFloat(formData.hourlyRate) : 0,
-      notes: formData.notes.trim() || undefined
+      notes: formData.notes.trim() || undefined,
+      isActive: false
     })
   }
 
@@ -185,7 +186,7 @@ export default function WorkersPage() {
             paid: worker.paid,
             createdAt: task.createdAt,
             workerIndex: workerIndex,
-            allWorkers: task.workers
+            allWorkers: task.workers ?? []
           })
         })
       }
