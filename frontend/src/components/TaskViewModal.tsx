@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { type Item } from '../api/items'
 import Modal from './Modal'
 import TaskHistory from './TaskHistory'
 import { 
   getTaskPhotos,
   fetchImageAsDataUrl,
+  uploadTaskPhotos,
   type PhotoUploadResult 
 } from '../services/googleDrive'
 import { useAuth } from '../contexts/AuthContext'
@@ -20,6 +20,7 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
   const [photos, setPhotos] = useState<PhotoUploadResult[]>([])
   const [photoDataUrls, setPhotoDataUrls] = useState<Record<string, string>>({})
   const [isLoadingPhotos, setIsLoadingPhotos] = useState(false)
+  const [isUploadingPhotos, setIsUploadingPhotos] = useState(false)
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null)
   const { isAuthenticated } = useAuth()
 
@@ -71,6 +72,45 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
 
   if (!task) return null
 
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0 || !task.customer || !task.vehiclePlateNo) return
+
+    setIsUploadingPhotos(true)
+    try {
+      const uploadedPhotos = await uploadTaskPhotos(
+        Array.from(files),
+        task.id,
+        task.customer,
+        task.vehiclePlateNo
+      )
+      
+      // Fetch data URLs for newly uploaded photos
+      const newDataUrls: Record<string, string> = {}
+      await Promise.all(
+        uploadedPhotos.map(async (photo) => {
+          try {
+            const dataUrl = await fetchImageAsDataUrl(photo.fileId)
+            newDataUrls[photo.fileId] = dataUrl
+          } catch (error) {
+            console.error(`Failed to load photo ${photo.fileName}:`, error)
+          }
+        })
+      )
+
+      // Update state with new photos
+      setPhotos(prev => [...prev, ...uploadedPhotos])
+      setPhotoDataUrls(prev => ({ ...prev, ...newDataUrls }))
+    } catch (error) {
+      console.error('Failed to upload photos:', error)
+      alert('Failed to upload photos. Please try again.')
+    } finally {
+      setIsUploadingPhotos(false)
+      // Reset the input
+      e.target.value = ''
+    }
+  }
+
   const getTotalAmount = () => {
     return task.lineItems?.reduce((sum, item) => sum + (item.amount || 0), 0) || 0
   }
@@ -108,41 +148,106 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
         </div>
 
         {/* Photos Section */}
-        {isAuthenticated && photos.length > 0 && (
+        {isAuthenticated && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <a
-                href={`https://drive.google.com/drive/search?q=${task.customer.replace(/[^a-zA-Z0-9]/g, '_')}_${task.vehiclePlateNo.replace(/[^a-zA-Z0-9]/g, '_')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  fontWeight: 600,
-                  fontSize: 15,
-                  color: '#007bff',
-                  textDecoration: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.textDecoration = 'underline'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.textDecoration = 'none'
-                }}
-              >
-                📁 View Photos in Drive
-              </a>
+              {photos.length > 0 ? (
+                <a
+                  href={`https://drive.google.com/drive/search?q=${task.customer.replace(/[^a-zA-Z0-9]/g, '_')}_${task.vehiclePlateNo.replace(/[^a-zA-Z0-9]/g, '_')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontWeight: 600,
+                    fontSize: 15,
+                    color: '#007bff',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.textDecoration = 'underline'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.textDecoration = 'none'
+                  }}
+                >
+                  📁 Photos ({photos.length})
+                </a>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ fontWeight: 600, fontSize: 15, color: '#fff' }}>Photos</div>
+                  {isLoadingPhotos && (
+                    <div style={{
+                      width: 16,
+                      height: 16,
+                      border: '2px solid #ddd',
+                      borderTop: '2px solid #007bff',
+                      borderRadius: '50%',
+                      animation: 'spin 0.8s linear infinite'
+                    }} />
+                  )}
+                </div>
+              )}
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <label style={{
+                  padding: '6px 14px',
+                  backgroundColor: '#007bff',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 6,
+                  cursor: isUploadingPhotos ? 'not-allowed' : 'pointer',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  opacity: isUploadingPhotos ? 0.6 : 1,
+                  transition: 'opacity 0.2s'
+                }}>
+                  {isUploadingPhotos ? '⏳ Uploading...' : '📷 Camera'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    multiple
+                    onChange={handlePhotoUpload}
+                    disabled={isUploadingPhotos}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+                <label style={{
+                  padding: '6px 14px',
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 6,
+                  cursor: isUploadingPhotos ? 'not-allowed' : 'pointer',
+                  fontSize: 13,
+                  fontWeight: 500,
+                  opacity: isUploadingPhotos ? 0.6 : 1,
+                  transition: 'opacity 0.2s'
+                }}>
+                  {isUploadingPhotos ? '⏳ Uploading...' : '🖼️ Gallery'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handlePhotoUpload}
+                    disabled={isUploadingPhotos}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+              </div>
             </div>
             
-            <div style={{ 
-              display: 'flex',
-              gap: 12,
-              overflowX: 'auto',
-              paddingBottom: 8,
-              marginBottom: 12
-            }}>
-              {photos.map((photo, index) => (
+            {photos.length > 0 && (
+              <div style={{ 
+                display: 'flex',
+                gap: 12,
+                overflowX: 'auto',
+                paddingBottom: 8,
+                marginBottom: 12
+              }}>
+                {photos.map((photo, index) => (
                 <div
                   key={photo.fileId}
                   onClick={() => photoDataUrls[photo.fileId] && setSelectedPhotoIndex(index)}
@@ -197,7 +302,8 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
                   )}
                 </div>
               ))}
-            </div>
+              </div>
+            )}
           </div>
         )}
 
