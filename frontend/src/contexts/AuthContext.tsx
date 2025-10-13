@@ -155,8 +155,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
       }
 
-      // Request access token with prompt to show consent screen
-      tokenClient.requestAccessToken({ prompt: 'consent' })
+      // Request access token (only prompts if necessary)
+      tokenClient.requestAccessToken({ prompt: '' })
     })
   }
 

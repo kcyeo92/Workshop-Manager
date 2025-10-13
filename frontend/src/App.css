@@ -877,7 +877,11 @@ html, body {
   background-color: #e0e0e0;
 }
 
-
+.modal-body {
+  max-height: calc(90vh - 100px);
+  overflow-y: auto;
+  overflow-x: visible;
+}
 
 /* Form Elements in Modals */
 .modal-body input,

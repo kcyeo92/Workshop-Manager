@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 interface ModalProps {
   isOpen: boolean
@@ -8,6 +8,8 @@ interface ModalProps {
 }
 
 export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
+  const modalContentRef = useRef<HTMLDivElement>(null)
+  
   // Lock body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -44,6 +46,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
       onClick={onClose}
     >
       <div
+        ref={modalContentRef}
         className="modal-content"
         onClick={(e) => e.stopPropagation()}
       >
