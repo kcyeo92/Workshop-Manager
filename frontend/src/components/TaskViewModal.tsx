@@ -171,14 +171,6 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
     }
   }
 
-  const getTotalAmount = () => {
-    return task.lineItems?.reduce((sum, item) => sum + (item.amount || 0), 0) || 0
-  }
-
-  const getTotalWages = () => {
-    return task.workers?.reduce((sum, worker) => sum + (worker.wage || 0), 0) || 0
-  }
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'todo': return '#6c757d'
