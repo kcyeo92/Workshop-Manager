@@ -53,10 +53,6 @@ export const initializeDrive = () => {
 // Create folder structure: Workshop Photos/yyyy/mm/customer_plateNumber
 export const ensureFolderStructure = async (customer: string, plateNumber: string): Promise<string> => {
   const drive = initializeDrive();
-  
-  if (!FOLDER_ID) {
-    throw new Error('GOOGLE_DRIVE_FOLDER_ID not configured');
-  }
 
   const now = new Date();
   const year = now.getFullYear().toString();
@@ -64,8 +60,40 @@ export const ensureFolderStructure = async (customer: string, plateNumber: strin
   const customerPlate = `${customer.replace(/[^a-zA-Z0-9]/g, '_')}_${plateNumber.replace(/[^a-zA-Z0-9]/g, '_')}`;
 
   try {
+    let rootFolderId: string;
+    
+    // If FOLDER_ID is not set, create "Workshop Photos" folder in service account's drive
+    if (!FOLDER_ID) {
+      console.log('GOOGLE_DRIVE_FOLDER_ID not set, creating folder in service account drive');
+      // Search for existing Workshop Photos folder in root
+      const rootSearch = await drive.files.list({
+        q: `name='Workshop Photos' and 'root' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+        fields: 'files(id)',
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true,
+      });
+      
+      if (rootSearch.data.files && rootSearch.data.files.length > 0) {
+        rootFolderId = rootSearch.data.files[0].id;
+      } else {
+        // Create Workshop Photos folder
+        const rootFolder = await drive.files.create({
+          requestBody: {
+            name: 'Workshop Photos',
+            mimeType: 'application/vnd.google-apps.folder',
+          },
+          fields: 'id',
+          supportsAllDrives: true,
+        });
+        rootFolderId = rootFolder.data.id;
+        console.log('Created Workshop Photos folder:', rootFolderId);
+      }
+    } else {
+      rootFolderId = FOLDER_ID;
+    }
+    
     // Find or create year folder
-    const yearFolder = await findOrCreateFolder(drive, year, FOLDER_ID);
+    const yearFolder = await findOrCreateFolder(drive, year, rootFolderId);
     
     // Find or create month folder
     const monthFolder = await findOrCreateFolder(drive, month, yearFolder);
@@ -171,12 +199,27 @@ export const getTaskPhotos = async (
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
     const customerPlate = `${customer.replace(/[^a-zA-Z0-9]/g, '_')}_${plateNumber.replace(/[^a-zA-Z0-9]/g, '_')}`;
 
+    let rootFolderId: string;
+    
     if (!FOLDER_ID) {
-      throw new Error('GOOGLE_DRIVE_FOLDER_ID not configured');
+      // Search for Workshop Photos folder in root
+      const rootSearch = await drive.files.list({
+        q: `name='Workshop Photos' and 'root' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+        fields: 'files(id)',
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true,
+      });
+      
+      if (!rootSearch.data.files || rootSearch.data.files.length === 0) {
+        return [];
+      }
+      rootFolderId = rootSearch.data.files[0].id;
+    } else {
+      rootFolderId = FOLDER_ID;
     }
 
     // Search for the task folder
-    const yearFolder = await findOrCreateFolder(drive, year, FOLDER_ID);
+    const yearFolder = await findOrCreateFolder(drive, year, rootFolderId);
     const monthFolder = await findOrCreateFolder(drive, month, yearFolder);
     
     // Search for customer_plate folder
