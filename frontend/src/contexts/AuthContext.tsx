@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
-import { initializeGoogleAPI, initializeGIS, setTokenExpiration, stopBackgroundRefresh } from '../services/googleDrive'
 
 interface AuthContextType {
   isAuthenticated: boolean
@@ -10,7 +9,6 @@ interface AuthContextType {
     email: string
     picture: string
   } | null
-  accessToken: string | null
   login: () => Promise<void>
   logout: () => void
 }
@@ -33,165 +31,106 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [user, setUser] = useState<{ name: string; email: string; picture: string } | null>(null)
-  const [accessToken, setAccessToken] = useState<string | null>(null)
-  const [tokenClient, setTokenClient] = useState<any>(null)
 
-  // Initialize Google APIs on mount
+  // Load Google Identity Services script
   useEffect(() => {
-    const initGoogle = async () => {
-      if (!import.meta.env.VITE_GOOGLE_CLIENT_ID || !import.meta.env.VITE_GOOGLE_API_KEY) {
-        console.error('Google credentials not configured')
-        setIsLoading(false)
-        return
-      }
+    const script = document.createElement('script')
+    script.src = 'https://accounts.google.com/gsi/client'
+    script.async = true
+    script.defer = true
+    document.body.appendChild(script)
 
-      try {
-        await initializeGoogleAPI()
-        const client = await initializeGIS()
-        setTokenClient(client)
-        
-        // Check if user was previously logged in
-        const savedToken = sessionStorage.getItem('google_access_token')
-        const savedUser = sessionStorage.getItem('google_user')
-        const savedExpiresAt = sessionStorage.getItem('google_token_expires_at')
-        
-        if (savedToken && savedUser) {
-          setAccessToken(savedToken)
-          setUser(JSON.parse(savedUser))
-          setIsAuthenticated(true)
-          
-          // Set token in gapi client
-          ;(window as any).gapi.client.setToken({ access_token: savedToken })
-          
-          // Restore token expiration time if available
-          if (savedExpiresAt) {
-            const expiresAt = parseInt(savedExpiresAt, 10)
-            const remainingSeconds = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000))
-            setTokenExpiration(remainingSeconds)
-          }
-        }
-      } catch (error) {
-        console.error('Failed to initialize Google APIs:', error)
-      } finally {
-        setIsLoading(false)
+    script.onload = () => {
+      // Check if user was previously logged in
+      const savedUser = sessionStorage.getItem('google_user')
+      if (savedUser) {
+        setUser(JSON.parse(savedUser))
+        setIsAuthenticated(true)
       }
+      setIsLoading(false)
     }
 
-    initGoogle()
+    return () => {
+      document.body.removeChild(script)
+    }
   }, [])
 
   const login = async (): Promise<void> => {
-    if (!tokenClient) {
-      throw new Error('Google APIs not initialized')
+    if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
+      throw new Error('Google Client ID not configured')
     }
 
     return new Promise((resolve, reject) => {
-      tokenClient.callback = async (response: any) => {
-        if (response.error !== undefined) {
-          reject(response)
-          return
-        }
-
-        const token = response.access_token
-        setAccessToken(token)
-        
-        // Set token in gapi client
-        ;(window as any).gapi.client.setToken({ access_token: token })
-        
-        // Store token expiration time (tokens typically expire in 3600 seconds)
-        const expiresIn = response.expires_in || 3600
-        setTokenExpiration(expiresIn)
-        
-        // Store expiration time in session storage for persistence
-        sessionStorage.setItem('google_token_expires_at', (Date.now() + expiresIn * 1000).toString())
-
-        try {
-          // Get user info
-          const userInfoResponse = await fetch(
-            'https://www.googleapis.com/oauth2/v2/userinfo',
-            {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            }
-          )
-          
-          if (!userInfoResponse.ok) {
-            throw new Error(`Failed to fetch user info: ${userInfoResponse.statusText}`)
-          }
-          
-          const userInfo = await userInfoResponse.json()
-          console.log('User info received:', userInfo)
-          
-          if (!userInfo.email) {
-            throw new Error('Email not found in user info. Please ensure email scope is granted.')
-          }
-          
-          const userData = {
-            name: userInfo.name,
-            email: userInfo.email,
-            picture: userInfo.picture
-          }
-          
-          // Check if email is allowed
-          const allowedEmailsEnv = import.meta.env.VITE_ALLOWED_EMAIL
-          if (allowedEmailsEnv) {
-            // Split by comma and trim whitespace
-            const allowedEmails = allowedEmailsEnv.split(',').map((email: string) => email.trim())
-            console.log('Allowed emails:', allowedEmails)
-            console.log('User email:', userData.email)
-            
-            if (!allowedEmails.includes(userData.email)) {
-              // Revoke token and reject
-              ;(window as any).google.accounts.oauth2.revoke(token, () => {
-                console.log('Token revoked for unauthorized user')
-              })
-              ;(window as any).gapi.client.setToken(null)
-              reject(new Error(`Access denied. Your email (${userData.email}) is not authorized to access this application.`))
-              return
-            }
-          }
-          
-          setUser(userData)
-          setIsAuthenticated(true)
-          
-          // Save to session storage
-          sessionStorage.setItem('google_access_token', token)
-          sessionStorage.setItem('google_user', JSON.stringify(userData))
-          
-          console.log('User logged in:', userData)
-          resolve()
-        } catch (error) {
-          console.error('Failed to get user info:', error)
-          reject(error)
-        }
+      if (!(window as any).google) {
+        reject(new Error('Google Identity Services not loaded'))
+        return
       }
 
-      // Request access token (only prompts if necessary)
-      tokenClient.requestAccessToken({ prompt: '' })
+      const client = (window as any).google.accounts.oauth2.initTokenClient({
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+        scope: 'openid email profile',
+        callback: async (response: any) => {
+          if (response.error !== undefined) {
+            reject(response)
+            return
+          }
+
+          try {
+            // Get user info
+            const userInfoResponse = await fetch(
+              'https://www.googleapis.com/oauth2/v2/userinfo',
+              {
+                headers: {
+                  Authorization: `Bearer ${response.access_token}`
+                }
+              }
+            )
+            
+            if (!userInfoResponse.ok) {
+              throw new Error('Failed to get user info')
+            }
+
+            const userInfo = await userInfoResponse.json()
+            
+            // Check if email is whitelisted
+            const allowedEmails = import.meta.env.VITE_ALLOWED_EMAIL?.split(',').map((email: string) => email.trim()) || []
+            
+            if (allowedEmails.length > 0 && !allowedEmails.includes(userInfo.email)) {
+              alert(`Access denied. Your email (${userInfo.email}) is not whitelisted.`)
+              reject(new Error('Email not whitelisted'))
+              return
+            }
+
+            const userData = {
+              name: userInfo.name,
+              email: userInfo.email,
+              picture: userInfo.picture
+            }
+
+            setUser(userData)
+            setIsAuthenticated(true)
+            
+            // Save user data to session storage
+            sessionStorage.setItem('google_user', JSON.stringify(userData))
+
+            console.log('User logged in:', userData)
+            resolve()
+          } catch (error) {
+            console.error('Error during login:', error)
+            reject(error)
+          }
+        },
+      })
+
+      // Request access token
+      client.requestAccessToken()
     })
   }
 
   const logout = () => {
-    const token = (window as any).gapi.client.getToken()
-    if (token !== null) {
-      (window as any).google.accounts.oauth2.revoke(token.access_token, () => {
-        console.log('Token revoked')
-      })
-      ;(window as any).gapi.client.setToken(null)
-    }
-    
-    // Stop background token refresh
-    stopBackgroundRefresh()
-    
-    setIsAuthenticated(false)
     setUser(null)
-    setAccessToken(null)
-    
-    sessionStorage.removeItem('google_access_token')
+    setIsAuthenticated(false)
     sessionStorage.removeItem('google_user')
-    sessionStorage.removeItem('google_token_expires_at')
-    
     console.log('User logged out')
   }
 
@@ -201,13 +140,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         isAuthenticated,
         isLoading,
         user,
-        accessToken,
         login,
-        logout
+        logout,
       }}
     >
       {children}
     </AuthContext.Provider>
   )
 }
-
