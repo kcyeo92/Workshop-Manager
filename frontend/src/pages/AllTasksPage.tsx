@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { listItems, deleteItem, updateItem, addTaskEvent, type Item, type Worker } from '../api/items'
 import { createInvoice, listInvoices } from '../api/invoices'
 import { getCustomerByName, type Customer } from '../api/customers'
-import TaskModal from '../components/TaskModal'
+import TaskViewModal from '../components/TaskViewModal'
 import InvoiceModal from '../components/InvoiceModal'
 import CustomerDetailsModal from '../components/CustomerDetailsModal'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -122,6 +122,18 @@ export default function AllTasksPage() {
     setCurrentInvoiceNumber(undefined)
   }
 
+  const handleViewInvoice = (taskId: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    
+    // Find the invoice for this task
+    const invoice = invoices.find(inv => inv.taskIds.includes(taskId))
+    if (invoice) {
+      setInvoiceTasks(invoice.tasks)
+      setCurrentInvoiceNumber(invoice.id)
+      setIsInvoiceModalOpen(true)
+    }
+  }
+
   const handleCheckboxChange = (taskId: number, e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation()
     const newSelected = new Set(selectedTaskIds)
@@ -206,6 +218,21 @@ export default function AllTasksPage() {
   // Helper function to check if a task has been invoiced
   const isTaskInvoiced = (taskId: number): boolean => {
     return invoices.some(invoice => invoice.taskIds.includes(taskId))
+  }
+
+  // Helper function to get invoice date for a task
+  const getInvoiceDate = (taskId: number): number | null => {
+    const invoice = invoices.find(inv => inv.taskIds.includes(taskId))
+    return invoice ? invoice.createdAt : null
+  }
+
+  // Helper function to format date with 2-digit year
+  const formatDate = (timestamp: number): string => {
+    const date = new Date(timestamp)
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = String(date.getFullYear()).slice(-2)
+    return `${day}/${month}/${year}`
   }
 
   // Apply filters
@@ -314,7 +341,6 @@ export default function AllTasksPage() {
 
       <div className="page-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <h2>All Tasks</h2>
         </div>
         <div className="task-stats">
           <div className="stat-item">
@@ -531,9 +557,22 @@ export default function AllTasksPage() {
                     ) : '-'}
                   </td>
                   <td>{task.paid ? `$${task.paid.toFixed(2)}` : '-'}</td>
-                  <td>{new Date(task.createdAt).toLocaleDateString()}</td>
+                  <td>{formatDate(task.createdAt)}</td>
                   <td onClick={(e) => e.stopPropagation()}>
-                    {!isTaskInvoiced(task.id) && (
+                    {isTaskInvoiced(task.id) ? (
+                      <a
+                        onClick={(e) => handleViewInvoice(task.id, e)}
+                        style={{
+                          fontSize: 12,
+                          color: '#28a745',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          textDecoration: 'underline'
+                        }}
+                      >
+                        {formatDate(getInvoiceDate(task.id)!)}
+                      </a>
+                    ) : (
                       <button
                         onClick={(e) => handleInvoiceClick(task, e)}
                         style={{
@@ -680,9 +719,22 @@ export default function AllTasksPage() {
                       ) : '-'}
                     </td>
                     <td>{task.paid ? `$${task.paid.toFixed(2)}` : '-'}</td>
-                    <td>{new Date(task.createdAt).toLocaleDateString()}</td>
+                    <td>{formatDate(task.createdAt)}</td>
                     <td onClick={(e) => e.stopPropagation()}>
-                      {!isTaskInvoiced(task.id) && (
+                      {isTaskInvoiced(task.id) ? (
+                        <a
+                          onClick={(e) => handleViewInvoice(task.id, e)}
+                          style={{
+                            fontSize: 12,
+                            color: '#28a745',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            textDecoration: 'underline'
+                          }}
+                        >
+                          {formatDate(getInvoiceDate(task.id)!)}
+                        </a>
+                      ) : (
                         <button
                           onClick={(e) => handleInvoiceClick(task, e)}
                           style={{
@@ -699,7 +751,7 @@ export default function AllTasksPage() {
                         </button>
                       )}
                     </td>
-                    <td>{task.completedAt ? new Date(task.completedAt).toLocaleDateString() : '-'}</td>
+                    <td>{task.completedAt ? formatDate(task.completedAt) : '-'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -774,7 +826,7 @@ export default function AllTasksPage() {
       )}
 
       {/* Task Detail Modal */}
-      <TaskModal
+      <TaskViewModal
         task={selectedTask}
         isOpen={isModalOpen}
         onClose={handleModalClose}

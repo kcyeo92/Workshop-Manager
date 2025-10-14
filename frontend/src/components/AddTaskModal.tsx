@@ -4,9 +4,8 @@ import { createItem, type LineItem } from '../api/items'
 import Modal from './Modal'
 import CustomerSelector from './CustomerSelector'
 import LineItemSelector from './LineItemSelector'
-import { uploadTaskPhotos } from '../services/googleDrive'
+import { uploadPhotos } from '../api/photos'
 import { analyzeVehiclePhotos, extractVehicleInfo } from '../services/gemini'
-import { useAuth } from '../contexts/AuthContext'
 
 interface AddTaskModalProps {
   isOpen: boolean
@@ -27,7 +26,6 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
   const [photos, setPhotos] = useState<File[]>([])
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [geminiAnalysis, setGeminiAnalysis] = useState<string>('')
-  const { isAuthenticated } = useAuth()
   const queryClient = useQueryClient()
 
   const clearForm = () => {
@@ -91,7 +89,7 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
     })
     
     // Upload photos in the background if there are any
-    if (photos.length > 0 && isAuthenticated) {
+    if (photos.length > 0) {
       const photosToUpload = [...photos]
       const customer = formData.customer
       const plateNo = formData.vehiclePlateNo
@@ -99,11 +97,9 @@ export default function AddTaskModal({ isOpen, onClose }: AddTaskModalProps) {
       // Upload in background (non-blocking)
       setTimeout(async () => {
         try {
-          console.log('Starting background photo upload to Google Drive...')
-          const tempTaskId = Date.now()
-          await uploadTaskPhotos(
+          console.log('Starting background photo upload to backend...')
+          await uploadPhotos(
             photosToUpload,
-            tempTaskId,
             customer,
             plateNo
           )

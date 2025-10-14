@@ -6,13 +6,7 @@ import TaskHistory from './TaskHistory'
 import CustomerSelector from './CustomerSelector'
 import LineItemSelector from './LineItemSelector'
 import WorkerSelector from './WorkerSelector'
-import { 
-  getTaskPhotos,
-  fetchImageAsDataUrl,
-  uploadTaskPhotos,
-  type PhotoUploadResult 
-} from '../services/googleDrive'
-import { useAuth } from '../contexts/AuthContext'
+import { uploadPhotos, getPhotos, getPhotoUrl, type Photo } from '../api/photos'
 import { getWorkerByName } from '../api/workers'
 
 interface TaskViewModalProps {
@@ -22,14 +16,12 @@ interface TaskViewModalProps {
 }
 
 export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalProps) {
-  const [photos, setPhotos] = useState<PhotoUploadResult[]>([])
-  const [photoDataUrls, setPhotoDataUrls] = useState<Record<string, string>>({})
+  const [photos, setPhotos] = useState<Photo[]>([])
   const [isLoadingPhotos, setIsLoadingPhotos] = useState(false)
   const [isUploadingPhotos, setIsUploadingPhotos] = useState(false)
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null)
   const [isHistoryExpanded, setIsHistoryExpanded] = useState(false)
   const [editingSection, setEditingSection] = useState<'none' | 'customer' | 'items' | 'workers'>('none')
-  const { isAuthenticated } = useAuth()
   const queryClient = useQueryClient()
   
   // Edit form state
@@ -67,39 +59,23 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
     }
   })
 
-  // Load photos when Google API is ready and task is available
+  // Load photos from backend
   useEffect(() => {
     const loadPhotos = async () => {
-      if (!isAuthenticated || !task || !task.customer || !task.vehiclePlateNo) {
-        console.log('Skipping photo load:', { isAuthenticated, hasTask: !!task, customer: task?.customer, plate: task?.vehiclePlateNo })
+      if (!task || !task.customer || !task.vehiclePlateNo) {
+        console.log('Skipping photo load:', { hasTask: !!task, customer: task?.customer, plate: task?.vehiclePlateNo })
         return
       }
       
       setIsLoadingPhotos(true)
       try {
         console.log('Loading photos for task:', task.customer, task.vehiclePlateNo)
-        const taskPhotos = await getTaskPhotos(task.customer, task.vehiclePlateNo)
+        const taskPhotos = await getPhotos(task.customer, task.vehiclePlateNo)
         console.log('Found photos:', taskPhotos.length)
         setPhotos(taskPhotos)
-        
-        // Fetch image data URLs for all photos
-        const dataUrls: Record<string, string> = {}
-        await Promise.all(
-          taskPhotos.map(async (photo) => {
-            try {
-              const dataUrl = await fetchImageAsDataUrl(photo.fileId)
-              dataUrls[photo.fileId] = dataUrl
-              console.log('Loaded photo:', photo.fileName)
-            } catch (error) {
-              console.error(`Failed to load photo ${photo.fileName}:`, error)
-              alert(`Failed to load photo ${photo.fileName}. Please check your Google Drive connection.`)
-            }
-          })
-        )
-        setPhotoDataUrls(dataUrls)
       } catch (error) {
         console.error('Error loading photos:', error)
-        alert(`Failed to load photos: ${error instanceof Error ? error.message : 'Unknown error'}. Please try logging in again.`)
+        // Don't alert on error - just log it
       } finally {
         setIsLoadingPhotos(false)
       }
@@ -108,14 +84,14 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
     if (isOpen && task) {
       loadPhotos()
     }
-  }, [isOpen, task, isAuthenticated])
+  }, [isOpen, task])
 
   // Clear photos when modal closes
   useEffect(() => {
     if (!isOpen) {
       setPhotos([])
-      setPhotoDataUrls({})
       setSelectedPhotoIndex(null)
+      setEditingSection('none')
     }
   }, [isOpen])
 
@@ -144,29 +120,14 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
 
     setIsUploadingPhotos(true)
     try {
-      const uploadedPhotos = await uploadTaskPhotos(
+      const uploadedPhotos = await uploadPhotos(
         Array.from(files),
-        task.id,
         task.customer,
         task.vehiclePlateNo
       )
       
-      // Fetch data URLs for newly uploaded photos
-      const newDataUrls: Record<string, string> = {}
-      await Promise.all(
-        uploadedPhotos.map(async (photo) => {
-          try {
-            const dataUrl = await fetchImageAsDataUrl(photo.fileId)
-            newDataUrls[photo.fileId] = dataUrl
-          } catch (error) {
-            console.error(`Failed to load photo ${photo.fileName}:`, error)
-          }
-        })
-      )
-
       // Update state with new photos
       setPhotos(prev => [...prev, ...uploadedPhotos])
-      setPhotoDataUrls(prev => ({ ...prev, ...newDataUrls }))
     } catch (error) {
       console.error('Failed to upload photos:', error)
       alert('Failed to upload photos. Please try again.')
@@ -188,6 +149,7 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
   }
 
   return (
+    <>
     <Modal isOpen={isOpen} onClose={onClose} title={`Task #${task.id}`}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {/* Status Badge */}
@@ -206,52 +168,46 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
         </div>
 
         {/* Photos Section */}
-        {isAuthenticated && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              {photos.length > 0 ? (
-                <a
-                  href={`https://drive.google.com/drive/search?q=${task.customer.replace(/[^a-zA-Z0-9]/g, '_')}_${task.vehiclePlateNo.replace(/[^a-zA-Z0-9]/g, '_')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 15,
-                    color: '#007bff',
-                    textDecoration: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.textDecoration = 'underline'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.textDecoration = 'none'
-                  }}
-                >
-                  📁 Photos ({photos.length})
-                </a>
-              ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ fontWeight: 600, fontSize: 15, color: '#fff' }}>Photos</div>
-                  {!isAuthenticated && (
-                    <span style={{ fontSize: 11, color: '#ffc107', backgroundColor: 'rgba(255, 193, 7, 0.2)', padding: '2px 8px', borderRadius: 4 }}>
-                      Not logged in
-                    </span>
-                  )}
-                  {isLoadingPhotos && (
-                    <div style={{
-                      width: 16,
-                      height: 16,
-                      border: '2px solid #ddd',
-                      borderTop: '2px solid #007bff',
-                      borderRadius: '50%',
-                      animation: 'spin 0.8s linear infinite'
-                    }} />
-                  )}
-                </div>
-              )}
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            {photos.length > 0 ? (
+              <a
+                href={`https://drive.google.com/drive/search?q=${task.customer.replace(/[^a-zA-Z0-9]/g, '_')}_${task.vehiclePlateNo.replace(/[^a-zA-Z0-9]/g, '_')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontWeight: 600,
+                  fontSize: 15,
+                  color: '#007bff',
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.textDecoration = 'underline'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.textDecoration = 'none'
+                }}
+              >
+                📁 Photos ({photos.length})
+              </a>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ fontWeight: 600, fontSize: 15, color: '#fff' }}>Photos</div>
+                {isLoadingPhotos && (
+                  <div style={{
+                    width: 16,
+                    height: 16,
+                    border: '2px solid #ddd',
+                    borderTop: '2px solid #007bff',
+                    borderRadius: '50%',
+                    animation: 'spin 0.8s linear infinite'
+                  }} />
+                )}
+              </div>
+            )}
               
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <label style={{
@@ -352,7 +308,7 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
                 {photos.map((photo, index) => (
                 <div
                   key={photo.fileId}
-                  onClick={() => photoDataUrls[photo.fileId] && setSelectedPhotoIndex(index)}
+                  onClick={() => setSelectedPhotoIndex(index)}
                   style={{
                     position: 'relative',
                     minWidth: 120,
@@ -361,53 +317,36 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
                     borderRadius: 8,
                     overflow: 'hidden',
                     border: '2px solid #ddd',
-                    cursor: photoDataUrls[photo.fileId] ? 'pointer' : 'default',
+                    cursor: 'pointer',
                     transition: 'transform 0.2s',
                     backgroundColor: '#f5f5f5',
                     flexShrink: 0
                   }}
                   onMouseEnter={(e) => {
-                    if (photoDataUrls[photo.fileId]) {
-                      e.currentTarget.style.transform = 'scale(1.05)'
-                      e.currentTarget.style.borderColor = '#007bff'
-                    }
+                    e.currentTarget.style.transform = 'scale(1.05)'
+                    e.currentTarget.style.borderColor = '#007bff'
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'scale(1)'
                     e.currentTarget.style.borderColor = '#ddd'
                   }}
                 >
-                  {photoDataUrls[photo.fileId] ? (
-                    <img
-                      src={photoDataUrls[photo.fileId]}
-                      alt={photo.fileName}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover'
-                      }}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div style={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      width: 20,
-                      height: 20,
-                      border: '2px solid #ddd',
-                      borderTop: '2px solid #007bff',
-                      borderRadius: '50%',
-                      animation: 'spin 0.8s linear infinite'
-                    }} />
-                  )}
+                  <img
+                    src={getPhotoUrl(photo.fileId)}
+                    alt={photo.fileName}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                    loading="lazy"
+                  />
                 </div>
               ))}
               </div>
             )}
           </div>
-        )}
+        </div>
 
         {/* Customer & Vehicle Info */}
         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -1029,10 +968,16 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
             Close
           </button>
         </div>
-      </div>
+     
+    </Modal>
 
-      {/* Photo Lightbox */}
-      {selectedPhotoIndex !== null && photoDataUrls[photos[selectedPhotoIndex]?.fileId] && (
+    {/* Photo Lightbox */}
+    {(() => {
+      if (selectedPhotoIndex === null) return null;
+      const currentIndex = selectedPhotoIndex as number;
+      if (currentIndex < 0 || currentIndex >= photos.length) return null;
+      const currentPhoto = photos[currentIndex];
+      return (
         <div
           onClick={() => setSelectedPhotoIndex(null)}
           style={{
@@ -1075,11 +1020,11 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
           </button>
 
           {/* Previous button */}
-          {selectedPhotoIndex > 0 && (
+          {currentIndex > 0 && (
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                setSelectedPhotoIndex(selectedPhotoIndex - 1)
+                setSelectedPhotoIndex(currentIndex - 1)
               }}
               style={{
                 position: 'absolute',
@@ -1104,11 +1049,11 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
           )}
 
           {/* Next button */}
-          {selectedPhotoIndex < photos.length - 1 && (
+          {currentIndex < photos.length - 1 && (
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                setSelectedPhotoIndex(selectedPhotoIndex + 1)
+                setSelectedPhotoIndex(currentIndex + 1)
               }}
               style={{
                 position: 'absolute',
@@ -1146,13 +1091,13 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
             padding: '8px 16px',
             borderRadius: 20
           }}>
-            {selectedPhotoIndex + 1} / {photos.length}
+            {currentIndex + 1} / {photos.length}
           </div>
 
           {/* Image */}
           <img
-            src={photoDataUrls[photos[selectedPhotoIndex].fileId]}
-            alt={photos[selectedPhotoIndex].fileName}
+            src={getPhotoUrl(currentPhoto.fileId)}
+            alt={currentPhoto.fileName}
             onClick={(e) => e.stopPropagation()}
             style={{
               maxWidth: '90%',
@@ -1163,8 +1108,9 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
             }}
           />
         </div>
-      )}
-    </Modal>
+      );
+    })()}
+    </>
   )
 }
 
