@@ -171,28 +171,16 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             {photos.length > 0 ? (
-              <a
-                href={`https://drive.google.com/drive/search?q=${task.customer.replace(/[^a-zA-Z0-9]/g, '_')}_${task.vehiclePlateNo.replace(/[^a-zA-Z0-9]/g, '_')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  fontWeight: 600,
-                  fontSize: 15,
-                  color: '#007bff',
-                  textDecoration: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.textDecoration = 'underline'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.textDecoration = 'none'
-                }}
-              >
+              <div style={{
+                fontWeight: 600,
+                fontSize: 15,
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6
+              }}>
                 📁 Photos ({photos.length})
-              </a>
+              </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <div style={{ fontWeight: 600, fontSize: 15, color: '#fff' }}>Photos</div>
@@ -332,7 +320,7 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
                   }}
                 >
                   <img
-                    src={getPhotoUrl(photo.fileId)}
+                    src={photo.publicUrl || getPhotoUrl(photo.fileId)}
                     alt={photo.fileName}
                     style={{
                       width: '100%',
@@ -1096,7 +1084,7 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
 
           {/* Image */}
           <img
-            src={getPhotoUrl(currentPhoto.fileId)}
+            src={currentPhoto.publicUrl || getPhotoUrl(currentPhoto.fileId)}
             alt={currentPhoto.fileName}
             onClick={(e) => e.stopPropagation()}
             style={{
