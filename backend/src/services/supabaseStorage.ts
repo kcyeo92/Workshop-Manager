@@ -40,7 +40,8 @@ export const uploadPhoto = async (
 
     if (error) {
       console.error('Supabase upload error:', error);
-      throw error;
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      throw new Error(`Supabase upload failed: ${error.message || JSON.stringify(error)}`);
     }
 
     // Get public URL
