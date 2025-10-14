@@ -71,12 +71,15 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
   useEffect(() => {
     const loadPhotos = async () => {
       if (!isAuthenticated || !task || !task.customer || !task.vehiclePlateNo) {
+        console.log('Skipping photo load:', { isAuthenticated, hasTask: !!task, customer: task?.customer, plate: task?.vehiclePlateNo })
         return
       }
       
       setIsLoadingPhotos(true)
       try {
+        console.log('Loading photos for task:', task.customer, task.vehiclePlateNo)
         const taskPhotos = await getTaskPhotos(task.customer, task.vehiclePlateNo)
+        console.log('Found photos:', taskPhotos.length)
         setPhotos(taskPhotos)
         
         // Fetch image data URLs for all photos
@@ -86,14 +89,17 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
             try {
               const dataUrl = await fetchImageAsDataUrl(photo.fileId)
               dataUrls[photo.fileId] = dataUrl
+              console.log('Loaded photo:', photo.fileName)
             } catch (error) {
               console.error(`Failed to load photo ${photo.fileName}:`, error)
+              alert(`Failed to load photo ${photo.fileName}. Please check your Google Drive connection.`)
             }
           })
         )
         setPhotoDataUrls(dataUrls)
       } catch (error) {
         console.error('Error loading photos:', error)
+        alert(`Failed to load photos: ${error instanceof Error ? error.message : 'Unknown error'}. Please try logging in again.`)
       } finally {
         setIsLoadingPhotos(false)
       }
@@ -229,6 +235,11 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <div style={{ fontWeight: 600, fontSize: 15, color: '#fff' }}>Photos</div>
+                  {!isAuthenticated && (
+                    <span style={{ fontSize: 11, color: '#ffc107', backgroundColor: 'rgba(255, 193, 7, 0.2)', padding: '2px 8px', borderRadius: 4 }}>
+                      Not logged in
+                    </span>
+                  )}
                   {isLoadingPhotos && (
                     <div style={{
                       width: 16,
