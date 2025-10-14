@@ -4,7 +4,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
 export interface Photo {
   fileId: string;
   fileName: string;
-  webViewLink: string;
+  publicUrl: string;
+  webViewLink?: string; // Keep for backward compatibility
 }
 
 // Upload photos for a task

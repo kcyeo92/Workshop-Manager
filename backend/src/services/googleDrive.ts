@@ -173,6 +173,37 @@ export const uploadPhoto = async (
     });
 
     console.log('Photo uploaded:', response.data.name);
+    
+    // Try to transfer ownership to the folder owner (doesn't work with personal Gmail, but worth trying)
+    try {
+      // Get folder owner
+      const folderInfo = await drive.files.get({
+        fileId: folderId,
+        fields: 'owners',
+        supportsAllDrives: true,
+      });
+      
+      if (folderInfo.data.owners && folderInfo.data.owners.length > 0) {
+        const ownerEmail = folderInfo.data.owners[0].emailAddress;
+        
+        // Transfer ownership
+        await drive.permissions.create({
+          fileId: response.data.id,
+          requestBody: {
+            role: 'owner',
+            type: 'user',
+            emailAddress: ownerEmail,
+          },
+          transferOwnership: true,
+          supportsAllDrives: true,
+        });
+        
+        console.log('Transferred ownership to:', ownerEmail);
+      }
+    } catch (ownershipError) {
+      console.log('Could not transfer ownership (expected for service accounts):', ownershipError);
+      // Continue anyway - file is uploaded
+    }
 
     return {
       fileId: response.data.id,
