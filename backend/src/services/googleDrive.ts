@@ -88,6 +88,8 @@ const findOrCreateFolder = async (drive: any, folderName: string, parentId: stri
       q: `name='${folderName}' and '${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
       fields: 'files(id, name)',
       spaces: 'drive',
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
     });
 
     if (response.data.files && response.data.files.length > 0) {
@@ -104,6 +106,7 @@ const findOrCreateFolder = async (drive: any, folderName: string, parentId: stri
     const folder = await drive.files.create({
       requestBody: folderMetadata,
       fields: 'id',
+      supportsAllDrives: true,
     });
 
     return folder.data.id;
@@ -138,6 +141,7 @@ export const uploadPhoto = async (
       requestBody: fileMetadata,
       media: media,
       fields: 'id, name, webViewLink',
+      supportsAllDrives: true,
     });
 
     console.log('Photo uploaded:', response.data.name);
@@ -180,6 +184,8 @@ export const getTaskPhotos = async (
       q: `name='${customerPlate}' and '${monthFolder}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
       fields: 'files(id)',
       spaces: 'drive',
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
     });
 
     if (!folderResponse.data.files || folderResponse.data.files.length === 0) {
@@ -194,6 +200,8 @@ export const getTaskPhotos = async (
       fields: 'files(id, name, webViewLink)',
       spaces: 'drive',
       orderBy: 'createdTime',
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
     });
 
     return filesResponse.data.files || [];
@@ -209,7 +217,7 @@ export const getPhotoContent = async (fileId: string): Promise<Buffer> => {
   
   try {
     const response = await drive.files.get(
-      { fileId: fileId, alt: 'media' },
+      { fileId: fileId, alt: 'media', supportsAllDrives: true },
       { responseType: 'arraybuffer' }
     );
 
