@@ -362,7 +362,7 @@ html, body {
   font-size: 16px;
   font-weight: 500;
   transition: background-color 0.2s ease;
-  min-height: 44px; /* Touch-friendly minimum */
+  min-height: 30px; /* Touch-friendly minimum */
 }
 
 .add-task-button:hover {
@@ -680,12 +680,23 @@ html, body {
   }
   
   .task-stats {
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.5rem;
+    flex-wrap: wrap;
   }
   
   .stat-item {
     min-width: unset;
+    flex: 1 1 calc(33.333% - 0.34rem);
+    padding: 0.5rem;
+  }
+
+  .stat-number {
+    font-size: 1.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
   }
   
   .add-task-section {
@@ -794,6 +805,12 @@ html, body {
     flex-shrink: 0;
     border: 1px solid #dc3545;
     line-height: 1;
+  }
+
+  .status-badge-table {
+    padding: 2px 8px;
+    font-size: 10px;
+    border-radius: 8px;
   }
 }
 
@@ -918,7 +935,7 @@ html, body {
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  min-height: 44px;
+  min-height: 30px;
   transition: all 0.2s ease;
 }
 
@@ -990,7 +1007,7 @@ html, body {
   .modal-body button {
     padding: 14px 20px;
     font-size: 16px;
-    width: 100%;
+    /* width: 100%; */
     margin-bottom: 8px;
   }
 }
@@ -1045,9 +1062,7 @@ html, body {
 }
 
 .filter-item label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #495057;
+  display: none;
 }
 
 .filter-select,
@@ -1075,11 +1090,26 @@ html, body {
 /* Responsive filters */
 @media (max-width: 768px) {
   .filters-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
   }
   
   .filters-container {
-    padding: 1rem;
+    padding: 0.75rem;
+  }
+
+  .filters-header {
+    display: none;
+  }
+
+  .filter-item label {
+    display: none;
+  }
+
+  .filter-select,
+  .filter-input {
+    padding: 6px 8px;
+    font-size: 12px;
   }
 }
 
@@ -1201,6 +1231,18 @@ html, body {
     padding: 8px 10px;
   }
   
+  /* Hide ID column (2nd column) */
+  .tasks-table th:nth-child(2),
+  .tasks-table td:nth-child(2) {
+    display: none;
+  }
+  
+  /* Hide Status column (3rd column) */
+  .tasks-table th:nth-child(3),
+  .tasks-table td:nth-child(3) {
+    display: none;
+  }
+  
   .line-items-cell {
     min-width: 150px;
   }
@@ -1212,5 +1254,24 @@ html, body {
   .column-content,
   .add-task-section {
     border-width: 0.5px;
+  }
+}
+
+/* Animations */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
   }
 }

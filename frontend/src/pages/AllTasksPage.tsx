@@ -287,26 +287,34 @@ export default function AllTasksPage() {
 
   return (
     <div className="page-container">
+      {/* Generate Invoice FAB */}
+      {selectedTaskIds.size > 0 && (
+        <button
+          onClick={handleGenerateInvoice}
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            padding: '12px 20px',
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            borderRadius: '24px',
+            cursor: 'pointer',
+            fontSize: 14,
+            fontWeight: 600,
+            boxShadow: '0 4px 12px rgba(0, 123, 255, 0.4)',
+            zIndex: 1000,
+            whiteSpace: 'nowrap'
+          }}
+        >
+           Generate ({selectedTaskIds.size})
+        </button>
+      )}
+
       <div className="page-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <h2>All Tasks</h2>
-          {selectedTaskIds.size > 0 && (
-            <button
-              onClick={handleGenerateInvoice}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#007bff',
-                color: 'white',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 14,
-                fontWeight: 500
-              }}
-            >
-              Generate Invoice ({selectedTaskIds.size} selected)
-            </button>
-          )}
         </div>
         <div className="task-stats">
           <div className="stat-item">
@@ -461,7 +469,14 @@ export default function AllTasksPage() {
                       type="checkbox"
                       checked={selectedTaskIds.has(task.id)}
                       onChange={(e) => handleCheckboxChange(task.id, e)}
-                      style={{ cursor: 'pointer', width: 16, height: 16 }}
+                      disabled={isTaskInvoiced(task.id)}
+                      style={{ 
+                        cursor: isTaskInvoiced(task.id) ? 'not-allowed' : 'pointer', 
+                        width: 16, 
+                        height: 16,
+                        opacity: isTaskInvoiced(task.id) ? 0.5 : 1
+                      }}
+                      title={isTaskInvoiced(task.id) ? 'Invoice already generated' : ''}
                     />
                   </td>
                   <td>#{task.id}</td>
@@ -603,7 +618,14 @@ export default function AllTasksPage() {
                         type="checkbox"
                         checked={selectedTaskIds.has(task.id)}
                         onChange={(e) => handleCheckboxChange(task.id, e)}
-                        style={{ cursor: 'pointer', width: 16, height: 16 }}
+                        disabled={isTaskInvoiced(task.id)}
+                        style={{ 
+                          cursor: isTaskInvoiced(task.id) ? 'not-allowed' : 'pointer', 
+                          width: 16, 
+                          height: 16,
+                          opacity: isTaskInvoiced(task.id) ? 0.5 : 1
+                        }}
+                        title={isTaskInvoiced(task.id) ? 'Invoice already generated' : ''}
                       />
                     </td>
                     <td>#{task.id}</td>
