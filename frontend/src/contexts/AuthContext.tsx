@@ -124,7 +124,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }
           
           // Check if email is allowed
-          const allowedEmailsEnv = import.meta.env.VITE_ALLOWED_EMAILS
+          const allowedEmailsEnv = import.meta.env.VITE_ALLOWED_EMAIL
           if (allowedEmailsEnv) {
             // Split by comma and trim whitespace
             const allowedEmails = allowedEmailsEnv.split(',').map((email: string) => email.trim())
