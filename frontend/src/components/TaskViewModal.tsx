@@ -545,22 +545,12 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
 
         {/* Items & Charges */}
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8, color: '#fff' }}>Items & Charges</div>
-          <div style={{ 
-            backgroundColor: '#2a2a2a',
-            borderRadius: 8,
-            overflow: editingSection === 'items' ? 'visible' : 'hidden',
-            border: '1px solid #444',
-            padding: editingSection === 'items' ? 16 : 0,
-            position: 'relative'
-          }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#fff' }}>Items & Charges</div>
             {/* Edit Button */}
             <button
               onClick={() => setEditingSection(editingSection === 'items' ? 'none' : 'items')}
               style={{
-                position: 'absolute',
-                top: 12,
-                right: 12,
                 padding: '6px 10px',
                 backgroundColor: editingSection === 'items' ? '#dc3545' : 'transparent',
                 color: editingSection === 'items' ? 'white' : '#999',
@@ -570,12 +560,20 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
                 fontSize: 16,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 4,
-                zIndex: 1
+                gap: 4
               }}
             >
               {editingSection === 'items' ? '✕' : '✏️'}
             </button>
+          </div>
+          <div style={{ 
+            backgroundColor: '#2a2a2a',
+            borderRadius: 8,
+            overflow: editingSection === 'items' ? 'visible' : 'hidden',
+            border: '1px solid #444',
+            padding: editingSection === 'items' ? 16 : 0,
+            position: 'relative'
+          }}>
             
             {editingSection === 'items' ? (
               // Edit mode
@@ -737,22 +735,12 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
         {/* Assigned Workers */}
         {(task.workers && task.workers.length > 0) || editingSection === 'workers' ? (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8, color: '#fff' }}>Assigned Workers</div>
-            <div style={{ 
-              backgroundColor: '#2a2a2a',
-              borderRadius: 8,
-              overflow: editingSection === 'workers' ? 'visible' : 'hidden',
-              border: '1px solid #444',
-              padding: editingSection === 'workers' ? 16 : 0,
-              position: 'relative'
-            }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <div style={{ fontSize: 15, fontWeight: 600, color: '#fff' }}>Assigned Workers</div>
               {/* Edit Button */}
               <button
                 onClick={() => setEditingSection(editingSection === 'workers' ? 'none' : 'workers')}
                 style={{
-                  position: 'absolute',
-                  top: 12,
-                  right: 12,
                   padding: '6px 10px',
                   backgroundColor: editingSection === 'workers' ? '#dc3545' : 'transparent',
                   color: editingSection === 'workers' ? 'white' : '#999',
@@ -762,12 +750,20 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
                   fontSize: 16,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 4,
-                  zIndex: 1
+                  gap: 4
                 }}
               >
                 {editingSection === 'workers' ? '✕' : '✏️'}
               </button>
+            </div>
+            <div style={{ 
+              backgroundColor: '#2a2a2a',
+              borderRadius: 8,
+              overflow: editingSection === 'workers' ? 'visible' : 'hidden',
+              border: '1px solid #444',
+              padding: editingSection === 'workers' ? 16 : 0,
+              position: 'relative'
+            }}>
               
               {editingSection === 'workers' ? (
                 // Edit mode
