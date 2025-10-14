@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { uploadPhoto, getTaskPhotos, getPhotoContent } from '../services/googleDrive';
+import { uploadPhoto, getTaskPhotos, getPhotoContent } from '../services/googleDrive.js';
 
 // Upload photos for a task
 export const uploadTaskPhotos = async (req: Request, res: Response) => {
