@@ -116,7 +116,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             }
           )
           
+          if (!userInfoResponse.ok) {
+            throw new Error(`Failed to fetch user info: ${userInfoResponse.statusText}`)
+          }
+          
           const userInfo = await userInfoResponse.json()
+          console.log('User info received:', userInfo)
+          
+          if (!userInfo.email) {
+            throw new Error('Email not found in user info. Please ensure email scope is granted.')
+          }
+          
           const userData = {
             name: userInfo.name,
             email: userInfo.email,
@@ -128,6 +138,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           if (allowedEmailsEnv) {
             // Split by comma and trim whitespace
             const allowedEmails = allowedEmailsEnv.split(',').map((email: string) => email.trim())
+            console.log('Allowed emails:', allowedEmails)
+            console.log('User email:', userData.email)
             
             if (!allowedEmails.includes(userData.email)) {
               // Revoke token and reject
