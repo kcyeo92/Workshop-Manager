@@ -373,8 +373,31 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
             backgroundColor: '#2a2a2a', 
             borderRadius: 8, 
             padding: 16,
-            border: '1px solid #444'
+            border: '1px solid #444',
+            position: 'relative'
           }}>
+            {/* Edit Button */}
+            <button
+              onClick={() => setEditingSection(editingSection === 'customer' ? 'none' : 'customer')}
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                padding: '6px 10px',
+                backgroundColor: editingSection === 'customer' ? '#dc3545' : 'transparent',
+                color: editingSection === 'customer' ? 'white' : '#999',
+                border: editingSection === 'customer' ? 'none' : '1px solid #444',
+                borderRadius: 4,
+                cursor: 'pointer',
+                fontSize: 16,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4
+              }}
+            >
+              {editingSection === 'customer' ? '✕' : '✏️'}
+            </button>
+            
             {editingSection === 'customer' ? (
               // Edit mode
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -493,37 +516,23 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
                 )}
               </>
             )}
-          </div>
-          
-          <div style={{ display: 'flex', gap: 6, marginTop: 8, alignSelf: 'flex-end' }}>
-            <button
-              onClick={() => setEditingSection(editingSection === 'customer' ? 'none' : 'customer')}
-              style={{
-                padding: '3px 10px',
-                backgroundColor: editingSection === 'customer' ? '#dc3545' : '#007bff',
-                color: 'white',
-                border: 'none',
-                borderRadius: 3,
-                cursor: 'pointer',
-                fontSize: 11,
-                fontWeight: 500
-              }}
-            >
-              {editingSection === 'customer' ? 'Cancel' : 'Edit'}
-            </button>
             
+            {/* Save Button (only in edit mode) */}
             {editingSection === 'customer' && (
               <button
                 onClick={handleSaveEdit}
                 disabled={updateMutation.isPending}
                 style={{
-                  padding: '3px 10px',
+                  position: 'absolute',
+                  bottom: 12,
+                  right: 12,
+                  padding: '6px 16px',
                   backgroundColor: '#28a745',
                   color: 'white',
                   border: 'none',
-                  borderRadius: 3,
+                  borderRadius: 4,
                   cursor: updateMutation.isPending ? 'not-allowed' : 'pointer',
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: 500,
                   opacity: updateMutation.isPending ? 0.6 : 1
                 }}
@@ -542,8 +551,32 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
             borderRadius: 8,
             overflow: editingSection === 'items' ? 'visible' : 'hidden',
             border: '1px solid #444',
-            padding: editingSection === 'items' ? 16 : 0
+            padding: editingSection === 'items' ? 16 : 0,
+            position: 'relative'
           }}>
+            {/* Edit Button */}
+            <button
+              onClick={() => setEditingSection(editingSection === 'items' ? 'none' : 'items')}
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                padding: '6px 10px',
+                backgroundColor: editingSection === 'items' ? '#dc3545' : 'transparent',
+                color: editingSection === 'items' ? 'white' : '#999',
+                border: editingSection === 'items' ? 'none' : '1px solid #444',
+                borderRadius: 4,
+                cursor: 'pointer',
+                fontSize: 16,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                zIndex: 1
+              }}
+            >
+              {editingSection === 'items' ? '✕' : '✏️'}
+            </button>
+            
             {editingSection === 'items' ? (
               // Edit mode
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -673,39 +706,26 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
                 </div>
               </>
             )}
-          </div>
-          
-          <div style={{ display: 'flex', gap: 6, marginTop: 8, alignSelf: 'flex-end' }}>
-            <button
-              onClick={() => setEditingSection(editingSection === 'items' ? 'none' : 'items')}
-              style={{
-                padding: '3px 10px',
-                backgroundColor: editingSection === 'items' ? '#dc3545' : '#007bff',
-                color: 'white',
-                border: 'none',
-                borderRadius: 3,
-                cursor: 'pointer',
-                fontSize: 11,
-                fontWeight: 500
-              }}
-            >
-              {editingSection === 'items' ? 'Cancel' : 'Edit'}
-            </button>
             
+            {/* Save Button (only in edit mode) */}
             {editingSection === 'items' && (
               <button
                 onClick={handleSaveEdit}
                 disabled={updateMutation.isPending}
                 style={{
-                  padding: '3px 10px',
+                  position: 'absolute',
+                  bottom: 12,
+                  right: 12,
+                  padding: '6px 16px',
                   backgroundColor: '#28a745',
                   color: 'white',
                   border: 'none',
-                  borderRadius: 3,
+                  borderRadius: 4,
                   cursor: updateMutation.isPending ? 'not-allowed' : 'pointer',
-                  fontSize: 11,
+                  fontSize: 13,
                   fontWeight: 500,
-                  opacity: updateMutation.isPending ? 0.6 : 1
+                  opacity: updateMutation.isPending ? 0.6 : 1,
+                  zIndex: 1
                 }}
               >
                 {updateMutation.isPending ? 'Saving...' : 'Save'}
@@ -723,8 +743,32 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
               borderRadius: 8,
               overflow: editingSection === 'workers' ? 'visible' : 'hidden',
               border: '1px solid #444',
-              padding: editingSection === 'workers' ? 16 : 0
+              padding: editingSection === 'workers' ? 16 : 0,
+              position: 'relative'
             }}>
+              {/* Edit Button */}
+              <button
+                onClick={() => setEditingSection(editingSection === 'workers' ? 'none' : 'workers')}
+                style={{
+                  position: 'absolute',
+                  top: 12,
+                  right: 12,
+                  padding: '6px 10px',
+                  backgroundColor: editingSection === 'workers' ? '#dc3545' : 'transparent',
+                  color: editingSection === 'workers' ? 'white' : '#999',
+                  border: editingSection === 'workers' ? 'none' : '1px solid #444',
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                  fontSize: 16,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  zIndex: 1
+                }}
+              >
+                {editingSection === 'workers' ? '✕' : '✏️'}
+              </button>
+              
               {editingSection === 'workers' ? (
                 // Edit mode
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -873,39 +917,26 @@ export default function TaskViewModal({ task, isOpen, onClose }: TaskViewModalPr
                   </div>
                 </>
               )}
-            </div>
-            
-            <div style={{ display: 'flex', gap: 6, marginTop: 8, alignSelf: 'flex-end' }}>
-              <button
-                onClick={() => setEditingSection(editingSection === 'workers' ? 'none' : 'workers')}
-                style={{
-                  padding: '3px 10px',
-                  backgroundColor: editingSection === 'workers' ? '#dc3545' : '#007bff',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 3,
-                  cursor: 'pointer',
-                  fontSize: 11,
-                  fontWeight: 500
-                }}
-              >
-                {editingSection === 'workers' ? 'Cancel' : 'Edit'}
-              </button>
               
+              {/* Save Button (only in edit mode) */}
               {editingSection === 'workers' && (
                 <button
                   onClick={handleSaveEdit}
                   disabled={updateMutation.isPending}
                   style={{
-                    padding: '3px 10px',
+                    position: 'absolute',
+                    bottom: 12,
+                    right: 12,
+                    padding: '6px 16px',
                     backgroundColor: '#28a745',
                     color: 'white',
                     border: 'none',
-                    borderRadius: 3,
+                    borderRadius: 4,
                     cursor: updateMutation.isPending ? 'not-allowed' : 'pointer',
-                    fontSize: 11,
+                    fontSize: 13,
                     fontWeight: 500,
-                    opacity: updateMutation.isPending ? 0.6 : 1
+                    opacity: updateMutation.isPending ? 0.6 : 1,
+                    zIndex: 1
                   }}
                 >
                   {updateMutation.isPending ? 'Saving...' : 'Save'}
