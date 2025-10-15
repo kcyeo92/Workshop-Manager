@@ -289,7 +289,9 @@ export default function AllTasksPage() {
   const endIndex = startIndex + itemsPerPage
   const paginatedTasks = filteredTasks.slice(startIndex, endIndex)
 
-  // Calculate totals
+  // Calculate totals and counts
+  const activeTasks = filteredTasks.filter(task => task.status !== 'done')
+  const completedTasks = filteredTasks.filter(task => task.status === 'done')
   const totalCharges = filteredTasks.reduce((sum, task) => sum + (task.price || 0), 0)
   const totalWages = filteredTasks.reduce((sum, task) => sum + (task.paid || 0), 0)
 
