@@ -571,9 +571,8 @@ export default function AllTasksPage() {
                   <td>
                     <div className="line-items-cell">
                       {task.lineItems?.map((item, idx) => (
-                        <div key={idx} className="line-item-row">
-                          <span className="line-item-desc">{item.description}</span>
-                          <span className="line-item-amount">${item.amount.toFixed(2)}</span>
+                        <div key={idx}>
+                          {item.description}
                         </div>
                       ))}
                     </div>
