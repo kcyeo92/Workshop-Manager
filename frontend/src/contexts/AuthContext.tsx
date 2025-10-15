@@ -36,11 +36,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     // Check if user was previously logged in (do this immediately)
     const savedUser = sessionStorage.getItem('google_user')
-    console.log('Checking saved user in sessionStorage:', savedUser ? 'Found' : 'Not found')
     if (savedUser) {
       try {
         const userData = JSON.parse(savedUser)
-        console.log('Restoring user session:', userData.email)
         setUser(userData)
         setIsAuthenticated(true)
       } catch (error) {
@@ -56,7 +54,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     document.body.appendChild(script)
 
     script.onload = () => {
-      console.log('Google Identity Services script loaded')
       setIsLoading(false)
     }
 
@@ -130,7 +127,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             // Save user data to session storage
             sessionStorage.setItem('google_user', JSON.stringify(userData))
 
-            console.log('User logged in:', userData)
             resolve()
           } catch (error) {
             console.error('Error during login:', error)
@@ -148,7 +144,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setUser(null)
     setIsAuthenticated(false)
     sessionStorage.removeItem('google_user')
-    console.log('User logged out')
   }
 
   return (
