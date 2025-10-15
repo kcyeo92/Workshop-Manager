@@ -509,7 +509,7 @@ export default function AllTasksPage() {
                 <th>Workers</th>
                 <th>Wages</th>
                 <th>Created</th>
-                <th>Actions</th>
+                <th>Completed</th>
               </tr>
             </thead>
             <tbody>
@@ -599,23 +599,8 @@ export default function AllTasksPage() {
                   </td>
                   <td>{task.paid ? `$${task.paid.toFixed(2)}` : '-'}</td>
                   <td>{formatDate(task.createdAt)}</td>
-                  <td onClick={(e) => e.stopPropagation()}>
-                    {task.status === 'done' ? (
-                      task.completedAt ? formatDate(task.completedAt) : '-'
-                    ) : task.status === 'todo' ? (
-                      <button
-                        className="delete-button-table"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          if (confirm('Delete this task?')) {
-                            deleteMutation.mutate(task.id)
-                          }
-                        }}
-                        disabled={deleteMutation.isPending}
-                      >
-                        ×
-                      </button>
-                    ) : '-'}
+                  <td>
+                    {task.status === 'done' && task.completedAt ? formatDate(task.completedAt) : '-'}
                   </td>
                 </tr>
               ))}
