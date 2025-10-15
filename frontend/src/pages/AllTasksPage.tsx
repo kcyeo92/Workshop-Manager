@@ -275,7 +275,7 @@ export default function AllTasksPage() {
 
     // Invoice generated filter
     if (filters.invoiceGenerated !== 'all') {
-      const hasInvoice = taskInvoiceMap.has(task.id)
+      const hasInvoice = isTaskInvoiced(task.id)
       if (filters.invoiceGenerated === 'yes' && !hasInvoice) return false
       if (filters.invoiceGenerated === 'no' && hasInvoice) return false
     }
