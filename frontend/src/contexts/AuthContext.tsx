@@ -34,6 +34,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Load Google Identity Services script
   useEffect(() => {
+    // Check if user was previously logged in (do this immediately)
+    const savedUser = sessionStorage.getItem('google_user')
+    console.log('Checking saved user in sessionStorage:', savedUser ? 'Found' : 'Not found')
+    if (savedUser) {
+      try {
+        const userData = JSON.parse(savedUser)
+        console.log('Restoring user session:', userData.email)
+        setUser(userData)
+        setIsAuthenticated(true)
+      } catch (error) {
+        console.error('Error parsing saved user:', error)
+        sessionStorage.removeItem('google_user')
+      }
+    }
+
     const script = document.createElement('script')
     script.src = 'https://accounts.google.com/gsi/client'
     script.async = true
@@ -41,17 +56,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     document.body.appendChild(script)
 
     script.onload = () => {
-      // Check if user was previously logged in
-      const savedUser = sessionStorage.getItem('google_user')
-      if (savedUser) {
-        setUser(JSON.parse(savedUser))
-        setIsAuthenticated(true)
-      }
+      console.log('Google Identity Services script loaded')
+      setIsLoading(false)
+    }
+
+    script.onerror = () => {
+      console.error('Failed to load Google Identity Services')
       setIsLoading(false)
     }
 
     return () => {
-      document.body.removeChild(script)
+      if (document.body.contains(script)) {
+        document.body.removeChild(script)
+      }
     }
   }, [])
 

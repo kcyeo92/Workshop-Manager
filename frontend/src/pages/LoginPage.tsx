@@ -12,6 +12,7 @@ export default function LoginPage() {
   // Redirect to home if already logged in
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
+      console.log(`is logged in`)
       const from = (location.state as any)?.from?.pathname || '/'
       navigate(from, { replace: true })
     }
