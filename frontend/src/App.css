@@ -1237,12 +1237,6 @@ html, body {
     display: none;
   }
   
-  /* Hide Status column (3rd column) */
-  .tasks-table th:nth-child(3),
-  .tasks-table td:nth-child(3) {
-    display: none;
-  }
-  
   /* Hide Workers column (9th column) */
   .tasks-table th:nth-child(9),
   .tasks-table td:nth-child(9) {

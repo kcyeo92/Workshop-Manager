@@ -311,7 +311,8 @@ export default function AllTasksPage() {
       status: 'all',
       dateFrom: '',
       dateTo: '',
-      plateNo: ''
+      plateNo: '',
+      invoiceGenerated: 'all'
     })
     setCurrentPage(1) // Reset to first page when filters change
   }
@@ -474,7 +475,7 @@ export default function AllTasksPage() {
               onChange={(e) => handleFilterChange('invoiceGenerated', e.target.value)}
               className="filter-select"
             >
-              <option value="all">All</option>
+              <option value="all">Invoice Status</option>
               <option value="yes">Generated</option>
               <option value="no">Not Generated</option>
             </select>
