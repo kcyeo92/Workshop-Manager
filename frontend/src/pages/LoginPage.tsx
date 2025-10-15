@@ -3,17 +3,22 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function LoginPage() {
+  console.log('LoginPage component rendered')
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { login, isAuthenticated, isLoading } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  
+  console.log('LoginPage state:', { isAuthenticated, isLoading })
 
   // Redirect to home if already logged in
   useEffect(() => {
+    console.log('LoginPage useEffect triggered:', { isLoading, isAuthenticated })
     if (!isLoading && isAuthenticated) {
-      console.log(`is logged in`)
+      console.log('User is logged in, redirecting...')
       const from = (location.state as any)?.from?.pathname || '/'
+      console.log('Redirecting to:', from)
       navigate(from, { replace: true })
     }
   }, [isAuthenticated, isLoading, navigate, location])

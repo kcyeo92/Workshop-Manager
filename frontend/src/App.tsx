@@ -11,6 +11,7 @@ import Header from './components/Header'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
+  console.log('App component loaded')
   const queryClient = new QueryClient()
   return (
     <QueryClientProvider client={queryClient}>
