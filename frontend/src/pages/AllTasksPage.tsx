@@ -283,14 +283,11 @@ export default function AllTasksPage() {
     return true
   })
 
-  const completedTasks = filteredTasks.filter(task => task.status === 'done')
-  const activeTasks = filteredTasks.filter(task => task.status !== 'done')
-
-  // Pagination for completed tasks
-  const totalPages = Math.ceil(completedTasks.length / itemsPerPage)
+  // Pagination for all tasks
+  const totalPages = Math.ceil(filteredTasks.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
-  const paginatedCompletedTasks = completedTasks.slice(startIndex, endIndex)
+  const paginatedTasks = filteredTasks.slice(startIndex, endIndex)
 
   // Calculate totals
   const totalCharges = filteredTasks.reduce((sum, task) => sum + (task.price || 0), 0)
@@ -483,12 +480,20 @@ export default function AllTasksPage() {
         </div>
       </div>
 
-      {/* Active Tasks Section */}
-      {activeTasks.length > 0 && (
-        <div className="tasks-section">
-          <h3 className="section-title">Active Tasks ({activeTasks.length})</h3>
-          <div className="table-container">
-            <table className="tasks-table">
+      {/* All Tasks Section */}
+      <div className="tasks-section">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <h3 className="section-title">All Tasks ({filteredTasks.length})</h3>
+          {totalPages > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 14, color: '#666' }}>
+                Page {currentPage} of {totalPages}
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="table-container">
+          <table className="tasks-table">
             <thead>
               <tr>
                 <th>Select</th>
@@ -507,11 +512,11 @@ export default function AllTasksPage() {
               </tr>
             </thead>
             <tbody>
-              {activeTasks.map(task => (
+              {paginatedTasks.map(task => (
                 <tr 
                   key={task.id} 
                   onClick={() => handleTaskClick(task)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: 'pointer', opacity: task.status === 'done' ? 0.7 : 1 }}
                 >
                   <td onClick={(e) => e.stopPropagation()}>
                     <input
@@ -613,7 +618,9 @@ export default function AllTasksPage() {
                     )}
                   </td>
                   <td onClick={(e) => e.stopPropagation()}>
-                    {task.status === 'todo' && (
+                    {task.status === 'done' ? (
+                      task.completedAt ? formatDate(task.completedAt) : '-'
+                    ) : task.status === 'todo' ? (
                       <button
                         className="delete-button-table"
                         onClick={(e) => {
@@ -626,163 +633,16 @@ export default function AllTasksPage() {
                       >
                         ×
                       </button>
-                    )}
+                    ) : '-'}
                   </td>
                 </tr>
               ))}
-              </tbody>
-            </table>
-          </div>
+            </tbody>
+          </table>
         </div>
-      )}
-
-      {/* Completed Tasks Section */}
-      {completedTasks.length > 0 && (
-        <div className="tasks-section">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <h3 className="section-title">Completed Tasks ({completedTasks.length})</h3>
-            {totalPages > 1 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 14, color: '#666' }}>
-                  Page {currentPage} of {totalPages}
-                </span>
-              </div>
-            )}
-          </div>
-          <div className="table-container">
-            <table className="tasks-table">
-              <thead>
-                <tr>
-                  <th>Select</th>
-                  <th>ID</th>
-                  <th>Status</th>
-                  <th>Customer</th>
-                  <th>Plate No</th>
-                  <th>Vehicle</th>
-                  <th>Items</th>
-                  <th>Total</th>
-                  <th>Workers</th>
-                  <th>Wages</th>
-                  <th>Created</th>
-                  <th>Invoice</th>
-                  <th>Completed</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedCompletedTasks.map(task => (
-                  <tr 
-                    key={task.id} 
-                    onClick={() => handleTaskClick(task)}
-                    style={{ cursor: 'pointer', opacity: 0.7 }}
-                  >
-                    <td onClick={(e) => e.stopPropagation()}>
-                      <input
-                        type="checkbox"
-                        checked={selectedTaskIds.has(task.id)}
-                        onChange={(e) => handleCheckboxChange(task.id, e)}
-                        disabled={isTaskInvoiced(task.id)}
-                        style={{ 
-                          cursor: isTaskInvoiced(task.id) ? 'not-allowed' : 'pointer', 
-                          width: 16, 
-                          height: 16,
-                          opacity: isTaskInvoiced(task.id) ? 0.5 : 1
-                        }}
-                        title={isTaskInvoiced(task.id) ? 'Invoice already generated' : ''}
-                      />
-                    </td>
-                    <td>#{task.id}</td>
-                    <td>
-                      <span 
-                        className="status-badge-table"
-                        style={{ backgroundColor: getStatusColor(task.status) }}
-                      >
-                        {getStatusLabel(task.status)}
-                      </span>
-                    </td>
-                    <td 
-                      onClick={(e) => handleCustomerClick(task.customer, e)}
-                      style={{ 
-                        color: '#007bff',
-                        cursor: 'pointer',
-                        textDecoration: 'underline'
-                      }}
-                    >
-                      {task.customer}
-                    </td>
-                    <td className="plate-no-cell">{task.vehiclePlateNo}</td>
-                    <td>{task.vehicleMake} {task.vehicleModel}</td>
-                    <td>
-                      <div className="line-items-cell">
-                        {task.lineItems?.map((item, idx) => (
-                          <div key={idx} className="line-item-row">
-                            <span className="line-item-desc">{item.description}</span>
-                            <span className="line-item-amount">${item.amount.toFixed(2)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </td>
-                    <td><strong>${task.price.toFixed(2)}</strong></td>
-                    <td onClick={(e) => e.stopPropagation()}>
-                      {task.workers && task.workers.length > 0 ? (
-                        <div className="line-items-cell">
-                        {task.workers.map((worker, idx) => (
-                          <div key={idx} className="line-item-row">
-                            <span className="line-item-desc">{worker.name}</span>
-                            <span className="line-item-amount">${worker.wage.toFixed(2)}</span>
-                            <input 
-                              type="checkbox" 
-                              checked={worker.paid} 
-                              onChange={(e) => handleWorkerPaidToggle(task, idx, e as any)}
-                              style={{ marginLeft: 8, cursor: 'pointer' }}
-                              title={worker.paid ? "Paid" : "Not paid"}
-                            />
-                          </div>
-                        ))}
-                        </div>
-                      ) : '-'}
-                    </td>
-                    <td>{task.paid ? `$${task.paid.toFixed(2)}` : '-'}</td>
-                    <td>{formatDate(task.createdAt)}</td>
-                    <td onClick={(e) => e.stopPropagation()}>
-                      {isTaskInvoiced(task.id) ? (
-                        <a
-                          onClick={(e) => handleViewInvoice(task.id, e)}
-                          style={{
-                            fontSize: 12,
-                            color: '#28a745',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            textDecoration: 'underline'
-                          }}
-                        >
-                          {formatDate(getInvoiceDate(task.id)!)}
-                        </a>
-                      ) : (
-                        <button
-                          onClick={(e) => handleInvoiceClick(task, e)}
-                          style={{
-                            padding: '4px 12px',
-                            backgroundColor: '#28a745',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: 4,
-                            cursor: 'pointer',
-                            fontSize: 13
-                          }}
-                        >
-                          Invoice
-                        </button>
-                      )}
-                    </td>
-                    <td>{task.completedAt ? formatDate(task.completedAt) : '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
+        
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
             <div style={{ 
               display: 'flex', 
               justifyContent: 'center', 
@@ -844,9 +704,8 @@ export default function AllTasksPage() {
                 {'>'}
               </button>
             </div>
-          )}
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Task Detail Modal */}
       <TaskViewModal
