@@ -101,16 +101,23 @@ function nextId(existingItems: Item[]): number {
   const day = String(today.getDate()).padStart(2, '0');
   const datePrefix = parseInt(`${year}${month}${day}`);
   
-  // Find all items created today
-  const todayStart = new Date(year, today.getMonth(), today.getDate()).getTime();
-  const todayEnd = todayStart + (24 * 60 * 60 * 1000);
-  
+  // Find all items with today's date prefix (yyyymmdd)
   const todayItems = existingItems.filter(item => {
-    return item.createdAt >= todayStart && item.createdAt < todayEnd;
+    const itemPrefix = Math.floor(item.id / 100); // Get yyyymmdd part
+    return itemPrefix === datePrefix;
   });
   
-  // Get the next sequential number for today
-  const nextNumber = todayItems.length + 1;
+  // Find the highest number suffix (NN) used today
+  let maxNumber = 0;
+  todayItems.forEach(item => {
+    const numberSuffix = item.id % 100; // Get NN part
+    if (numberSuffix > maxNumber) {
+      maxNumber = numberSuffix;
+    }
+  });
+  
+  // Next number is max + 1
+  const nextNumber = maxNumber + 1;
   const numberSuffix = String(nextNumber).padStart(2, '0');
   
   return parseInt(`${datePrefix}${numberSuffix}`);
