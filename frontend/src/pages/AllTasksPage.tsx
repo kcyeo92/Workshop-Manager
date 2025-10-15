@@ -25,7 +25,8 @@ export default function AllTasksPage() {
     status: 'all' as 'all' | 'todo' | 'assigned' | 'processing' | 'done',
     dateFrom: '',
     dateTo: '',
-    plateNo: ''
+    plateNo: '',
+    invoiceGenerated: 'all' as 'all' | 'yes' | 'no'
   })
   const queryClient = useQueryClient()
 
@@ -272,6 +273,13 @@ export default function AllTasksPage() {
       if (taskDate > toDate) return false
     }
 
+    // Invoice generated filter
+    if (filters.invoiceGenerated !== 'all') {
+      const hasInvoice = taskInvoiceMap.has(task.id)
+      if (filters.invoiceGenerated === 'yes' && !hasInvoice) return false
+      if (filters.invoiceGenerated === 'no' && hasInvoice) return false
+    }
+
     return true
   })
 
@@ -456,6 +464,20 @@ export default function AllTasksPage() {
               onChange={(e) => handleFilterChange('dateTo', e.target.value)}
               className="filter-input"
             />
+          </div>
+
+          {/* Invoice Generated Filter */}
+          <div className="filter-item">
+            <label>Invoice</label>
+            <select
+              value={filters.invoiceGenerated}
+              onChange={(e) => handleFilterChange('invoiceGenerated', e.target.value)}
+              className="filter-select"
+            >
+              <option value="all">All</option>
+              <option value="yes">Generated</option>
+              <option value="no">Not Generated</option>
+            </select>
           </div>
         </div>
       </div>
