@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
+console.log('=== LoginPage.tsx module loaded ===')
+
 export default function LoginPage() {
-  console.log('LoginPage component rendered')
+  console.log('>>> LoginPage component function called >>>')
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { login, isAuthenticated, isLoading } = useAuth()
