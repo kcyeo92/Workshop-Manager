@@ -68,26 +68,6 @@ export default function TaskHistory({ createdAt, statusHistory, taskEvents = [] 
           width: '2px',
           backgroundColor: '#dee2e6'
         }} />
-        
-        {/* Created event */}
-        <div style={{ marginBottom: '1rem', position: 'relative' }}>
-          <div style={{
-            position: 'absolute',
-            left: '-1.5rem',
-            top: '0.25rem',
-            width: '0.75rem',
-            height: '0.75rem',
-            borderRadius: '50%',
-            backgroundColor: '#6c757d',
-            border: '2px solid white'
-          }} />
-          <div style={{ fontSize: '0.875rem' }}>
-            <div style={{ fontWeight: 600, color: '#333' }}>Created</div>
-            <div style={{ fontSize: '0.75rem', color: '#6c757d', marginTop: '0.25rem' }}>
-              {formatTimestamp(createdAt)}
-            </div>
-          </div>
-        </div>
 
         {/* Status changes */}
         {statusHistory.map((history, index) => {

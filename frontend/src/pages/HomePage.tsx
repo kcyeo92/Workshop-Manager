@@ -99,9 +99,9 @@ export default function HomePage() {
     // Find the task being moved
     const task = items.find(item => item.id === itemId)
     if (!task) return
-    
-    // If moving to "assigned" column, prompt for worker assignment only if no workers assigned yet
-    if (newStatus === 'assigned') {
+
+    // If moving to "assigned", "processing", or "done" column, prompt for worker assignment only if no workers assigned yet
+    if (["assigned", "processing", "done"].includes(newStatus)) {
       // Check if task already has workers assigned
       if (!task.workers || task.workers.length === 0) {
         setPendingDragTask(task)

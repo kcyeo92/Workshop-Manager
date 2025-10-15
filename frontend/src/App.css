@@ -1179,13 +1179,24 @@ html, body {
   flex-direction: column;
   gap: 4px;
   min-width: 200px;
+  align-self: flex-start;
+}
+
+/* Align table cells with line-items-cell to top */
+.tasks-table td:has(.line-items-cell) {
+  vertical-align: top;
 }
 
 .line-item-row {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 4px 0;
+}
+
+.line-item-row:first-child {
+  padding-top: 0;
 }
 
 .line-item-desc {
