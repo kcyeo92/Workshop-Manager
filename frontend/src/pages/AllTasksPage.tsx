@@ -498,7 +498,6 @@ export default function AllTasksPage() {
           <table className="tasks-table">
             <thead>
               <tr>
-                <th>Select</th>
                 <th>ID</th>
                 <th>Status</th>
                 <th>Customer</th>
@@ -520,21 +519,6 @@ export default function AllTasksPage() {
                   onClick={() => handleTaskClick(task)}
                   style={{ cursor: 'pointer', opacity: task.status === 'done' ? 0.7 : 1 }}
                 >
-                  <td onClick={(e) => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      checked={selectedTaskIds.has(task.id)}
-                      onChange={(e) => handleCheckboxChange(task.id, e)}
-                      disabled={isTaskInvoiced(task.id)}
-                      style={{ 
-                        cursor: isTaskInvoiced(task.id) ? 'not-allowed' : 'pointer', 
-                        width: 16, 
-                        height: 16,
-                        opacity: isTaskInvoiced(task.id) ? 0.5 : 1
-                      }}
-                      title={isTaskInvoiced(task.id) ? 'Invoice already generated' : ''}
-                    />
-                  </td>
                   <td>#{task.id}</td>
                   <td>
                     <span 
@@ -603,20 +587,17 @@ export default function AllTasksPage() {
                         {formatDate(getInvoiceDate(task.id)!)}
                       </a>
                     ) : (
-                      <button
-                        onClick={(e) => handleInvoiceClick(task, e)}
-                        style={{
-                          padding: '4px 12px',
-                          backgroundColor: '#28a745',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: 4,
-                          cursor: 'pointer',
-                          fontSize: 13
+                      <input
+                        type="checkbox"
+                        checked={selectedTaskIds.has(task.id)}
+                        onChange={(e) => handleCheckboxChange(task.id, e)}
+                        style={{ 
+                          cursor: 'pointer', 
+                          width: 16, 
+                          height: 16
                         }}
-                      >
-                        Invoice
-                      </button>
+                        title="Select for invoice generation"
+                      />
                     )}
                   </td>
                   <td onClick={(e) => e.stopPropagation()}>
