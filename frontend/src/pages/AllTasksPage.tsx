@@ -26,7 +26,7 @@ export default function AllTasksPage() {
     dateFrom: '',
     dateTo: '',
     plateNo: '',
-    hideInvoiced: false
+    invoiceGenerated: 'all' as 'all' | 'yes' | 'no'
   })
   const queryClient = useQueryClient()
 
@@ -273,9 +273,11 @@ export default function AllTasksPage() {
       if (taskDate > toDate) return false
     }
 
-    // Invoice generated filter - hide invoiced tasks if checkbox is checked
-    if (filters.hideInvoiced && isTaskInvoiced(task.id)) {
-      return false
+    // Invoice generated filter
+    if (filters.invoiceGenerated !== 'all') {
+      const hasInvoice = isTaskInvoiced(task.id)
+      if (filters.invoiceGenerated === 'yes' && !hasInvoice) return false
+      if (filters.invoiceGenerated === 'no' && hasInvoice) return false
     }
 
     return true
@@ -465,25 +467,17 @@ export default function AllTasksPage() {
           </div>
 
           {/* Invoice Generated Filter */}
-          <div className="filter-item" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <input
-              type="checkbox"
-              id="hideInvoiced"
-              checked={filters.hideInvoiced}
-              onChange={(e) => handleFilterChange('hideInvoiced', e.target.checked)}
-              style={{ width: 18, height: 18, cursor: 'pointer' }}
-            />
-            <label 
-              htmlFor="hideInvoiced" 
-              style={{ 
-                margin: 0, 
-                cursor: 'pointer',
-                userSelect: 'none',
-                fontSize: 14
-              }}
+          <div className="filter-item">
+            <label>Invoice</label>
+            <select
+              value={filters.invoiceGenerated}
+              onChange={(e) => handleFilterChange('invoiceGenerated', e.target.value)}
+              className="filter-select"
             >
-              Hide Invoiced
-            </label>
+              <option value="all">All</option>
+              <option value="yes">Generated</option>
+              <option value="no">Not Generated</option>
+            </select>
           </div>
         </div>
       </div>
