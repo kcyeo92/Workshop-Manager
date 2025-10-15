@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { listItems, deleteItem, updateItem, addTaskEvent, type Item, type Worker } from '../api/items'
+import { listItems, updateItem, addTaskEvent, type Item, type Worker } from '../api/items'
 import { createInvoice, listInvoices } from '../api/invoices'
 import { getCustomerByName, type Customer } from '../api/customers'
 import TaskViewModal from '../components/TaskViewModal'
