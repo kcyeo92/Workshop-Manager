@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 export default function LoginPage() {
@@ -7,6 +7,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const handleLogin = async () => {
     setIsLoggingIn(true)
@@ -14,7 +15,9 @@ export default function LoginPage() {
 
     try {
       await login()
-      navigate('/')
+      // Redirect to the page they were trying to access, or home if none
+      const from = (location.state as any)?.from?.pathname || '/'
+      navigate(from, { replace: true })
     } catch (err: any) {
       console.error('Login failed:', err)
       setError(err.message || 'Failed to login. Please try again.')
@@ -126,7 +129,7 @@ export default function LoginPage() {
           marginTop: 24,
           lineHeight: 1.5
         }}>
-          By signing in, you agree to access your Google Drive for photo storage
+          Secure access with your Google account
         </p>
       </div>
     </div>
