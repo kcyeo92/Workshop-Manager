@@ -498,6 +498,7 @@ export default function AllTasksPage() {
           <table className="tasks-table">
             <thead>
               <tr>
+                <th>Invoice</th>
                 <th>ID</th>
                 <th>Status</th>
                 <th>Customer</th>
@@ -508,7 +509,6 @@ export default function AllTasksPage() {
                 <th>Workers</th>
                 <th>Wages</th>
                 <th>Created</th>
-                <th>Invoice</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -519,6 +519,34 @@ export default function AllTasksPage() {
                   onClick={() => handleTaskClick(task)}
                   style={{ cursor: 'pointer', opacity: task.status === 'done' ? 0.7 : 1 }}
                 >
+                  <td onClick={(e) => e.stopPropagation()}>
+                    {isTaskInvoiced(task.id) ? (
+                      <a
+                        onClick={(e) => handleViewInvoice(task.id, e)}
+                        style={{
+                          fontSize: 12,
+                          color: '#28a745',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          textDecoration: 'underline'
+                        }}
+                      >
+                        {formatDate(getInvoiceDate(task.id)!)}
+                      </a>
+                    ) : (
+                      <input
+                        type="checkbox"
+                        checked={selectedTaskIds.has(task.id)}
+                        onChange={(e) => handleCheckboxChange(task.id, e)}
+                        style={{ 
+                          cursor: 'pointer', 
+                          width: 16, 
+                          height: 16
+                        }}
+                        title="Select for invoice generation"
+                      />
+                    )}
+                  </td>
                   <td>#{task.id}</td>
                   <td>
                     <span 
@@ -572,34 +600,6 @@ export default function AllTasksPage() {
                   </td>
                   <td>{task.paid ? `$${task.paid.toFixed(2)}` : '-'}</td>
                   <td>{formatDate(task.createdAt)}</td>
-                  <td onClick={(e) => e.stopPropagation()}>
-                    {isTaskInvoiced(task.id) ? (
-                      <a
-                        onClick={(e) => handleViewInvoice(task.id, e)}
-                        style={{
-                          fontSize: 12,
-                          color: '#28a745',
-                          fontWeight: 500,
-                          cursor: 'pointer',
-                          textDecoration: 'underline'
-                        }}
-                      >
-                        {formatDate(getInvoiceDate(task.id)!)}
-                      </a>
-                    ) : (
-                      <input
-                        type="checkbox"
-                        checked={selectedTaskIds.has(task.id)}
-                        onChange={(e) => handleCheckboxChange(task.id, e)}
-                        style={{ 
-                          cursor: 'pointer', 
-                          width: 16, 
-                          height: 16
-                        }}
-                        title="Select for invoice generation"
-                      />
-                    )}
-                  </td>
                   <td onClick={(e) => e.stopPropagation()}>
                     {task.status === 'done' ? (
                       task.completedAt ? formatDate(task.completedAt) : '-'

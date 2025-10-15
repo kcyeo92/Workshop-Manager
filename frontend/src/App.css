@@ -1231,27 +1231,27 @@ html, body {
     padding: 8px 10px;
   }
   
-  /* Hide ID column (1st column) */
-  .tasks-table th:nth-child(1),
-  .tasks-table td:nth-child(1) {
-    display: none;
-  }
-  
-  /* Hide Status column (2nd column) */
+  /* Hide ID column (2nd column) */
   .tasks-table th:nth-child(2),
   .tasks-table td:nth-child(2) {
     display: none;
   }
   
-  /* Hide Workers column (8th column) */
-  .tasks-table th:nth-child(8),
-  .tasks-table td:nth-child(8) {
+  /* Hide Status column (3rd column) */
+  .tasks-table th:nth-child(3),
+  .tasks-table td:nth-child(3) {
     display: none;
   }
   
-  /* Hide Total Wages column (9th column) */
+  /* Hide Workers column (9th column) */
   .tasks-table th:nth-child(9),
   .tasks-table td:nth-child(9) {
+    display: none;
+  }
+  
+  /* Hide Total Wages column (10th column) */
+  .tasks-table th:nth-child(10),
+  .tasks-table td:nth-child(10) {
     display: none;
   }
   
