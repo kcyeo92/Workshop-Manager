@@ -40,11 +40,6 @@ export default function AllTasksPage() {
     queryFn: listInvoices
   })
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteItem(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['items'] }),
-  })
-
   const updateWorkerMutation = useMutation({
     mutationFn: ({ taskId, workers }: { taskId: number; workers: Worker[] }) => 
       updateItem(taskId, { workers }),
@@ -88,33 +83,6 @@ export default function AllTasksPage() {
   const handleCustomerModalClose = () => {
     setIsCustomerModalOpen(false)
     setSelectedCustomer(null)
-  }
-
-  const handleInvoiceClick = async (task: Item, e: React.MouseEvent) => {
-    e.stopPropagation()
-    
-    // Create and save the invoice
-    const invoice = await createInvoice({
-      taskIds: [task.id],
-      customerName: task.customer,
-      totalAmount: task.price,
-      tasks: [task]
-    })
-    
-    // Add task event for invoice generation
-    await addTaskEvent(task.id, {
-      type: 'invoice_generated',
-      timestamp: Date.now(),
-      invoiceNumber: invoice.id
-    })
-    
-    setInvoiceTasks([task])
-    setCurrentInvoiceNumber(invoice.id)
-    setIsInvoiceModalOpen(true)
-    
-    // Invalidate queries to refresh the page
-    queryClient.invalidateQueries({ queryKey: ['invoices'] })
-    queryClient.invalidateQueries({ queryKey: ['items'] })
   }
 
   const handleInvoiceModalClose = () => {
